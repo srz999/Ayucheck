@@ -1,0 +1,17 @@
+{
+  "name": "AyuCheck - Ayurveda Health Assistant",
+  "short_name": "AyuCheck",
+  "description": "Your intelligent Ayurvedic health companion powered by AI",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#22c55e",
+  "icons": [
+    {
+      "src": "/ayucheck-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

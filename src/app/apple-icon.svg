@@ -1,0 +1,16 @@
+<svg width="180" height="180" viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Apple touch icon - Ayurveda leaf symbol -->
+  <rect width="180" height="180" rx="40" fill="#22c55e"/>
+  
+  <!-- Main leaf -->
+  <path d="M55 90C55 67 72 45 90 45C108 45 125 67 125 90C125 113 108 125 90 125C72 125 55 113 55 90Z" fill="#ffffff"/>
+  
+  <!-- Leaf vein -->
+  <path d="M90 55L90 115" stroke="#22c55e" stroke-width="6" stroke-linecap="round"/>
+  
+  <!-- Side veins -->
+  <path d="M90 65L75 80" stroke="#22c55e" stroke-width="3" stroke-linecap="round"/>
+  <path d="M90 75L105 90" stroke="#22c55e" stroke-width="3" stroke-linecap="round"/>
+  <path d="M90 85L75 100" stroke="#22c55e" stroke-width="3" stroke-linecap="round"/>
+  <path d="M90 95L105 110" stroke="#22c55e" stroke-width="3" stroke-linecap="round"/>
+</svg>
