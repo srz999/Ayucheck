@@ -19,6 +19,10 @@ const config = {
     },
     extend: {
       colors: {
+        'forest-green': '#0B4D2C',
+        'forest-light': '#228B22',
+        'forest-dark': '#000000',
+        'forest-cream': '#F8F8F8',
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
