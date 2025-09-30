@@ -1,0 +1,389 @@
+{
+  "metadata": {
+    "source": "Ayurvedic Pharmacopoeia of India - Volume 1",
+    "transformation_date": "2024-12-19",
+    "total_herbs_processed": 47,
+    "total_tips": 47,
+    "tip_types": {
+      "herb_introduction": 47
+    }
+  },
+  "tips": [
+    {
+      "type": "herb_introduction",
+      "herb": "Ajamoda",
+      "botanical_name": "Apium leptophyllum",
+      "description": "...",
+      "synonyms": {},
+      "source_page": 15
+    },
+    {
+      "type": "herb_introduction",
+      "herb": "Ashoka",
+      "botanical_name": "Saraca asoca",
+      "description": "...",
+      "synonyms": {},
+      "source_page": 29
+    },
+    {
+      "type": "herb_introduction",
+      "herb": "Asvattha",
+      "botanical_name": "Ficus religiosa",
+      "description": "...",
+      "synonyms": {},
+      "source_page": 33
+    },
+    {
+      "type": "herb_introduction",
+      "herb": "Atasi",
+      "botanical_name": "",
+      "description": "...",
+      "synonyms": {},
+      "source_page": 35
+    },
+    {
+      "type": "herb_introduction",
+      "herb": "Atibala",
+      "botanical_name": "",
+      "description": "...",
+      "synonyms": {},
+      "source_page": 37
+    },
+    {
+      "type": "herb_introduction",
+      "herb": "Ativisha",
+      "botanical_name": "",
+      "description": "...",
+      "synonyms": {},
+      "source_page": 39
+    },
+    {
+      "type": "herb_introduction",
+      "herb": "Babbula",
+      "botanical_name": "",
+      "description": "...",
+      "synonyms": {},
+      "source_page": 41
+    },
+    {
+      "type": "herb_introduction",
+      "herb": "Bilva",
+      "botanical_name": "Bilva consists",
+      "description": "a) Macroscopic Fruit, sub-globose, 5-18 cm in diameter, externally greenish when young,  yellowish-brown when ripe, rind about 1.5 mm-3 mm thick, hard and woody, surface...",
+      "synonyms": {},
+      "source_page": 47
+    },
+    {
+      "type": "herb_introduction",
+      "herb": "Chitraka",
+      "botanical_name": "Citraka consists",
+      "description": "...",
+      "synonyms": {},
+      "source_page": 51
+    },
+    {
+      "type": "herb_introduction",
+      "herb": "Dhataki",
+      "botanical_name": "Dhataki consists",
+      "description": "...",
+      "synonyms": {},
+      "source_page": 55
+    },
+    {
+      "type": "herb_introduction",
+      "herb": "Eranda",
+      "botanical_name": "",
+      "description": "...",
+      "synonyms": {},
+      "source_page": 57
+    },
+    {
+      "type": "herb_introduction",
+      "herb": "Gambhari",
+      "botanical_name": "",
+      "description": "...",
+      "synonyms": {},
+      "source_page": 59
+    },
+    {
+      "type": "herb_introduction",
+      "herb": "Gokshura",
+      "botanical_name": "Tribulus terrestris",
+      "description": "...",
+      "synonyms": {},
+      "source_page": 61
+    },
+    {
+      "type": "herb_introduction",
+      "herb": "Gokshura",
+      "botanical_name": "",
+      "description": "...",
+      "synonyms": {},
+      "source_page": 63
+    },
+    {
+      "type": "herb_introduction",
+      "herb": "Gunja",
+      "botanical_name": "Abrus precatorius",
+      "description": "...",
+      "synonyms": {},
+      "source_page": 70
+    },
+    {
+      "type": "herb_introduction",
+      "herb": "Haridra",
+      "botanical_name": "",
+      "description": "...",
+      "synonyms": {},
+      "source_page": 72
+    },
+    {
+      "type": "herb_introduction",
+      "herb": "Haritaki",
+      "botanical_name": "",
+      "description": "...",
+      "synonyms": {},
+      "source_page": 74
+    },
+    {
+      "type": "herb_introduction",
+      "herb": "Hingu",
+      "botanical_name": "",
+      "description": "a) Macroscopic Rounded, flattened or masses of agglutinated tears, greyish-white to dull yellow,  mostly 12-25 mm in diameter, freshly exposed surface, yellowish and translucent or...",
+      "synonyms": {},
+      "source_page": 76
+    },
+    {
+      "type": "herb_introduction",
+      "herb": "Jatamansi",
+      "botanical_name": "Nardostachys jatama",
+      "description": "...",
+      "synonyms": {},
+      "source_page": 79
+    },
+    {
+      "type": "herb_introduction",
+      "herb": "Jatiphala",
+      "botanical_name": "",
+      "description": "...",
+      "synonyms": {},
+      "source_page": 81
+    },
+    {
+      "type": "herb_introduction",
+      "herb": "Kankola",
+      "botanical_name": "Piper cubeba",
+      "description": "...",
+      "synonyms": {},
+      "source_page": 87
+    },
+    {
+      "type": "herb_introduction",
+      "herb": "Kantakari",
+      "botanical_name": "",
+      "description": "...",
+      "synonyms": {},
+      "source_page": 89
+    },
+    {
+      "type": "herb_introduction",
+      "herb": "Karanja",
+      "botanical_name": "",
+      "description": "...",
+      "synonyms": {},
+      "source_page": 95
+    },
+    {
+      "type": "herb_introduction",
+      "herb": "Karkatashringi",
+      "botanical_name": "",
+      "description": "...",
+      "synonyms": {},
+      "source_page": 100
+    },
+    {
+      "type": "herb_introduction",
+      "herb": "Karpasa",
+      "botanical_name": "",
+      "description": "...",
+      "synonyms": {},
+      "source_page": 102
+    },
+    {
+      "type": "herb_introduction",
+      "herb": "Kaseru",
+      "botanical_name": "Scirpus kysoor",
+      "description": "...",
+      "synonyms": {},
+      "source_page": 104
+    },
+    {
+      "type": "herb_introduction",
+      "herb": "Ketaki",
+      "botanical_name": "Ketaki consists",
+      "description": "...",
+      "synonyms": {},
+      "source_page": 106
+    },
+    {
+      "type": "herb_introduction",
+      "herb": "Krishnajiraka",
+      "botanical_name": "Carum carvi",
+      "description": "...",
+      "synonyms": {},
+      "source_page": 113
+    },
+    {
+      "type": "herb_introduction",
+      "herb": "Kulattha",
+      "botanical_name": "Kulattha consists",
+      "description": "...",
+      "synonyms": {},
+      "source_page": 115
+    },
+    {
+      "type": "herb_introduction",
+      "herb": "Kushta",
+      "botanical_name": "Saussurea lappa",
+      "description": "...",
+      "synonyms": {},
+      "source_page": 117
+    },
+    {
+      "type": "herb_introduction",
+      "herb": "Kutaja",
+      "botanical_name": "",
+      "description": "...",
+      "synonyms": {},
+      "source_page": 119
+    },
+    {
+      "type": "herb_introduction",
+      "herb": "Lodhra",
+      "botanical_name": "Lodhra consists",
+      "description": "...",
+      "synonyms": {},
+      "source_page": 124
+    },
+    {
+      "type": "herb_introduction",
+      "herb": "Nyagrodha",
+      "botanical_name": "Nyagrodha consists",
+      "description": "...",
+      "synonyms": {},
+      "source_page": 130
+    },
+    {
+      "type": "herb_introduction",
+      "herb": "Pashanabheda",
+      "botanical_name": "",
+      "description": "...",
+      "synonyms": {},
+      "source_page": 132
+    },
+    {
+      "type": "herb_introduction",
+      "herb": "Patha",
+      "botanical_name": "Cissampelos pareira",
+      "description": "...",
+      "synonyms": {},
+      "source_page": 134
+    },
+    {
+      "type": "herb_introduction",
+      "herb": "Puga",
+      "botanical_name": "Areca catechu",
+      "description": "...",
+      "synonyms": {},
+      "source_page": 136
+    },
+    {
+      "type": "herb_introduction",
+      "herb": "Saptaparna",
+      "botanical_name": "",
+      "description": "...",
+      "synonyms": {},
+      "source_page": 141
+    },
+    {
+      "type": "herb_introduction",
+      "herb": "Tagara",
+      "botanical_name": "Tagara consists",
+      "description": "...",
+      "synonyms": {},
+      "source_page": 158
+    },
+    {
+      "type": "herb_introduction",
+      "herb": "Tamalaki",
+      "botanical_name": "",
+      "description": "...",
+      "synonyms": {},
+      "source_page": 160
+    },
+    {
+      "type": "herb_introduction",
+      "herb": "Tvakapatra",
+      "botanical_name": "Tvakpatra consists",
+      "description": "...",
+      "synonyms": {},
+      "source_page": 165
+    },
+    {
+      "type": "herb_introduction",
+      "herb": "Udumbara",
+      "botanical_name": "Udumbara consists",
+      "description": "...",
+      "synonyms": {},
+      "source_page": 167
+    },
+    {
+      "type": "herb_introduction",
+      "herb": "Upakunchika",
+      "botanical_name": "Nigella sativa",
+      "description": "...",
+      "synonyms": {},
+      "source_page": 169
+    },
+    {
+      "type": "herb_introduction",
+      "herb": "Varuna",
+      "botanical_name": "",
+      "description": "...",
+      "synonyms": {},
+      "source_page": 171
+    },
+    {
+      "type": "herb_introduction",
+      "herb": "Vasa",
+      "botanical_name": "Adhatoda vasica",
+      "description": "...",
+      "synonyms": {},
+      "source_page": 173
+    },
+    {
+      "type": "herb_introduction",
+      "herb": "Vidanga",
+      "botanical_name": "Embelia ribes",
+      "description": "...",
+      "synonyms": {},
+      "source_page": 175
+    },
+    {
+      "type": "herb_introduction",
+      "herb": "Vijayaa",
+      "botanical_name": "",
+      "description": "...",
+      "synonyms": {},
+      "source_page": 178
+    },
+    {
+      "type": "herb_introduction",
+      "herb": "Yashti",
+      "botanical_name": "",
+      "description": "...",
+      "synonyms": {},
+      "source_page": 180
+    }
+  ]
+}

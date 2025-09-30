@@ -1,0 +1,728 @@
+{
+  "metadata": {
+    "source": "Ayurvedic Pharmacopoeia of India - Volume 1",
+    "transformation_date": "2024-12-19",
+    "total_herbs_processed": 79,
+    "total_tips": 79,
+    "tip_types": {
+      "herb_overview": 79
+    },
+    "categories": {
+      "herb_identification": 79
+    },
+    "description": "Practical Ayurvedic tips extracted from classical pharmacopoeia for modern use"
+  },
+  "tips": [
+    {
+      "type": "herb_overview",
+      "herb": "Ajagandha",
+      "botanical_name": "Cleome gynandra Linn",
+      "content": "Ajagandha (Cleome gynandra Linn) - a) Macroscopic Seeds, small, 1-2 mm in diameter, kidney shaped, surface rough, dark brown or black. b) Microscopic Dark brown, oily; under microscope ...",
+      "synonyms": {},
+      "source_page": 13,
+      "category": "herb_identification"
+    },
+    {
+      "type": "herb_overview",
+      "herb": "Ajamoda",
+      "botanical_name": "Apium leptophyllum",
+      "content": "Ajamoda (Apium leptophyllum)",
+      "synonyms": {},
+      "source_page": 15,
+      "category": "herb_identification"
+    },
+    {
+      "type": "herb_overview",
+      "herb": "Amalaki",
+      "botanical_name": "Emblica officinalis  Gaertn",
+      "content": "Amalaki (Emblica officinalis  Gaertn)",
+      "synonyms": {},
+      "source_page": 17,
+      "category": "herb_identification"
+    },
+    {
+      "type": "herb_overview",
+      "herb": "Amalaki",
+      "botanical_name": "Emblica officinalis Gaertn",
+      "content": "Amalaki (Emblica officinalis Gaertn)",
+      "synonyms": {},
+      "source_page": 19,
+      "category": "herb_identification"
+    },
+    {
+      "type": "herb_overview",
+      "herb": "Aragavadha",
+      "botanical_name": "Cassia fistula Linn",
+      "content": "Aragavadha (Cassia fistula Linn)",
+      "synonyms": {},
+      "source_page": 21,
+      "category": "herb_identification"
+    },
+    {
+      "type": "herb_overview",
+      "herb": "Arka",
+      "botanical_name": "",
+      "content": "Arka",
+      "synonyms": {},
+      "source_page": 23,
+      "category": "herb_identification"
+    },
+    {
+      "type": "herb_overview",
+      "herb": "Arka",
+      "botanical_name": "",
+      "content": "Arka",
+      "synonyms": {},
+      "source_page": 25,
+      "category": "herb_identification"
+    },
+    {
+      "type": "herb_overview",
+      "herb": "Asana",
+      "botanical_name": "",
+      "content": "Asana",
+      "synonyms": {},
+      "source_page": 27,
+      "category": "herb_identification"
+    },
+    {
+      "type": "herb_overview",
+      "herb": "Ashoka",
+      "botanical_name": "Saraca asoca",
+      "content": "Ashoka (Saraca asoca)",
+      "synonyms": {},
+      "source_page": 29,
+      "category": "herb_identification"
+    },
+    {
+      "type": "herb_overview",
+      "herb": "Asvagandha",
+      "botanical_name": "Withania somnifera Dunal",
+      "content": "Asvagandha (Withania somnifera Dunal)",
+      "synonyms": {},
+      "source_page": 31,
+      "category": "herb_identification"
+    },
+    {
+      "type": "herb_overview",
+      "herb": "Asvattha",
+      "botanical_name": "Ficus religiosa Linn",
+      "content": "Asvattha (Ficus religiosa Linn)",
+      "synonyms": {},
+      "source_page": 33,
+      "category": "herb_identification"
+    },
+    {
+      "type": "herb_overview",
+      "herb": "Atasi",
+      "botanical_name": "Linum usitatissimum Linn",
+      "content": "Atasi (Linum usitatissimum Linn)",
+      "synonyms": {},
+      "source_page": 35,
+      "category": "herb_identification"
+    },
+    {
+      "type": "herb_overview",
+      "herb": "Atibala",
+      "botanical_name": "Abutilon indicum",
+      "content": "Atibala (Abutilon indicum)",
+      "synonyms": {},
+      "source_page": 37,
+      "category": "herb_identification"
+    },
+    {
+      "type": "herb_overview",
+      "herb": "Ativisha",
+      "botanical_name": "Aconitum heterophyllum Wall",
+      "content": "Ativisha (Aconitum heterophyllum Wall)",
+      "synonyms": {},
+      "source_page": 39,
+      "category": "herb_identification"
+    },
+    {
+      "type": "herb_overview",
+      "herb": "Babbula",
+      "botanical_name": "Acacia nilotica",
+      "content": "Babbula (Acacia nilotica)",
+      "synonyms": {},
+      "source_page": 41,
+      "category": "herb_identification"
+    },
+    {
+      "type": "herb_overview",
+      "herb": "Bakuchi",
+      "botanical_name": "",
+      "content": "Bakuchi",
+      "synonyms": {},
+      "source_page": 43,
+      "category": "herb_identification"
+    },
+    {
+      "type": "herb_overview",
+      "herb": "Bibhitaka",
+      "botanical_name": "Terntinalia belerica Roxb",
+      "content": "Bibhitaka (Terntinalia belerica Roxb)",
+      "synonyms": {},
+      "source_page": 45,
+      "category": "herb_identification"
+    },
+    {
+      "type": "herb_overview",
+      "herb": "Bilva",
+      "botanical_name": "Aegle marmelos Carr",
+      "content": "Bilva (Aegle marmelos Carr) - a) Macroscopic Fruit, sub-globose, 5-18 cm in diameter, externally greenish when young, yellowish-brown when ripe, rind about 1.5 mm-3 mm thick, hard ...",
+      "synonyms": {},
+      "source_page": 47,
+      "category": "herb_identification"
+    },
+    {
+      "type": "herb_overview",
+      "herb": "Chandrasua",
+      "botanical_name": "Lepidium sativum Linn",
+      "content": "Chandrasua (Lepidium sativum Linn) - a) Macroscopic Seeds, small, oval-shaped, pointed and triangular at one end, smooth, about 2-3 mm long, 1-1.5 mm wide, reddish brown, a furrow present...",
+      "synonyms": {},
+      "source_page": 49,
+      "category": "herb_identification"
+    },
+    {
+      "type": "herb_overview",
+      "herb": "Chitraka",
+      "botanical_name": "Plumbago zeylanica  Linn",
+      "content": "Chitraka (Plumbago zeylanica  Linn)",
+      "synonyms": {},
+      "source_page": 51,
+      "category": "herb_identification"
+    },
+    {
+      "type": "herb_overview",
+      "herb": "Dhanyaka",
+      "botanical_name": "Coriandrum sativum  Linn",
+      "content": "Dhanyaka (Coriandrum sativum  Linn)",
+      "synonyms": {},
+      "source_page": 53,
+      "category": "herb_identification"
+    },
+    {
+      "type": "herb_overview",
+      "herb": "Dhataki",
+      "botanical_name": "Woodfordia fruticosa",
+      "content": "Dhataki (Woodfordia fruticosa)",
+      "synonyms": {},
+      "source_page": 55,
+      "category": "herb_identification"
+    },
+    {
+      "type": "herb_overview",
+      "herb": "Eranda",
+      "botanical_name": "Ricinus communis  Linn",
+      "content": "Eranda (Ricinus communis  Linn)",
+      "synonyms": {},
+      "source_page": 57,
+      "category": "herb_identification"
+    },
+    {
+      "type": "herb_overview",
+      "herb": "Gambhari",
+      "botanical_name": "Gmelina arborea Roxb",
+      "content": "Gambhari (Gmelina arborea Roxb)",
+      "synonyms": {},
+      "source_page": 59,
+      "category": "herb_identification"
+    },
+    {
+      "type": "herb_overview",
+      "herb": "Gokshura",
+      "botanical_name": "Tribulus terrestris Linn",
+      "content": "Gokshura (Tribulus terrestris Linn)",
+      "synonyms": {},
+      "source_page": 61,
+      "category": "herb_identification"
+    },
+    {
+      "type": "herb_overview",
+      "herb": "Gokshura",
+      "botanical_name": "Tribulus terrestris Linn",
+      "content": "Gokshura (Tribulus terrestris Linn)",
+      "synonyms": {},
+      "source_page": 63,
+      "category": "herb_identification"
+    },
+    {
+      "type": "herb_overview",
+      "herb": "Guduchi",
+      "botanical_name": "Tinospora cordifolia",
+      "content": "Guduchi (Tinospora cordifolia)",
+      "synonyms": {},
+      "source_page": 65,
+      "category": "herb_identification"
+    },
+    {
+      "type": "herb_overview",
+      "herb": "Guggulu",
+      "botanical_name": "",
+      "content": "Guggulu - a) Macroscopic Drug occurs in vermicular or stalactitic pieces of pale yellow or brown coloured mass, makes milky emulsion in hot water and readily bu...",
+      "synonyms": {},
+      "source_page": 68,
+      "category": "herb_identification"
+    },
+    {
+      "type": "herb_overview",
+      "herb": "Gunja",
+      "botanical_name": "Abrus precatorius Linn",
+      "content": "Gunja (Abrus precatorius Linn)",
+      "synonyms": {},
+      "source_page": 70,
+      "category": "herb_identification"
+    },
+    {
+      "type": "herb_overview",
+      "herb": "Haridra",
+      "botanical_name": "Curcuma longa Linn",
+      "content": "Haridra (Curcuma longa Linn)",
+      "synonyms": {},
+      "source_page": 72,
+      "category": "herb_identification"
+    },
+    {
+      "type": "herb_overview",
+      "herb": "Haritaki",
+      "botanical_name": "Terminalia chebula Retz",
+      "content": "Haritaki (Terminalia chebula Retz)",
+      "synonyms": {},
+      "source_page": 74,
+      "category": "herb_identification"
+    },
+    {
+      "type": "herb_overview",
+      "herb": "Hingu",
+      "botanical_name": "Ferula \nfoetida Regel",
+      "content": "Hingu (Ferula \nfoetida Regel) - a) Macroscopic Rounded, flattened or masses of agglutinated tears, greyish-white to dull yellow, mostly 12-25 mm in diameter, freshly exposed surface,...",
+      "synonyms": {},
+      "source_page": 76,
+      "category": "herb_identification"
+    },
+    {
+      "type": "herb_overview",
+      "herb": "Jatamansi",
+      "botanical_name": "Nardostachys jatamansi",
+      "content": "Jatamansi (Nardostachys jatamansi)",
+      "synonyms": {},
+      "source_page": 79,
+      "category": "herb_identification"
+    },
+    {
+      "type": "herb_overview",
+      "herb": "Jatiphala",
+      "botanical_name": "Myristica \nfragrans Houtt",
+      "content": "Jatiphala (Myristica \nfragrans Houtt)",
+      "synonyms": {},
+      "source_page": 81,
+      "category": "herb_identification"
+    },
+    {
+      "type": "herb_overview",
+      "herb": "Kampilla",
+      "botanical_name": "Mallotus philippinensis Muell",
+      "content": "Kampilla (Mallotus philippinensis Muell) - a) Macroscopic Fine, granular powder, dull-red or madder-red coloured, floating on water. b) Microscopic Under microscope glands appear depressed and ...",
+      "synonyms": {},
+      "source_page": 83,
+      "category": "herb_identification"
+    },
+    {
+      "type": "herb_overview",
+      "herb": "Kanchanara",
+      "botanical_name": "Bauhinia variegata Blume",
+      "content": "Kanchanara (Bauhinia variegata Blume)",
+      "synonyms": {},
+      "source_page": 85,
+      "category": "herb_identification"
+    },
+    {
+      "type": "herb_overview",
+      "herb": "Kankola",
+      "botanical_name": "Piper cubeba Linn",
+      "content": "Kankola (Piper cubeba Linn)",
+      "synonyms": {},
+      "source_page": 87,
+      "category": "herb_identification"
+    },
+    {
+      "type": "herb_overview",
+      "herb": "Kantakari",
+      "botanical_name": "Solanum surattense  Burm",
+      "content": "Kantakari (Solanum surattense  Burm)",
+      "synonyms": {},
+      "source_page": 89,
+      "category": "herb_identification"
+    },
+    {
+      "type": "herb_overview",
+      "herb": "Kanyasara",
+      "botanical_name": "Aloe barbadensis Mill",
+      "content": "Kanyasara (Aloe barbadensis Mill) - a) Macroscopic Dark chocolate brown, to black, compact, irregular masses: surface dull, opaque with slightly vitreous appearance, odour, characteristi...",
+      "synonyms": {},
+      "source_page": 93,
+      "category": "herb_identification"
+    },
+    {
+      "type": "herb_overview",
+      "herb": "Karanja",
+      "botanical_name": "Pongamia pinnata",
+      "content": "Karanja (Pongamia pinnata)",
+      "synonyms": {},
+      "source_page": 95,
+      "category": "herb_identification"
+    },
+    {
+      "type": "herb_overview",
+      "herb": "Karavira",
+      "botanical_name": "Nerium indicum Mill",
+      "content": "Karavira (Nerium indicum Mill)",
+      "synonyms": {},
+      "source_page": 97,
+      "category": "herb_identification"
+    },
+    {
+      "type": "herb_overview",
+      "herb": "Karkatashringi",
+      "botanical_name": "Pistacia chinensia Burgo",
+      "content": "Karkatashringi (Pistacia chinensia Burgo)",
+      "synonyms": {},
+      "source_page": 100,
+      "category": "herb_identification"
+    },
+    {
+      "type": "herb_overview",
+      "herb": "Karpasa",
+      "botanical_name": "Gossypium herbaceum Linn",
+      "content": "Karpasa (Gossypium herbaceum Linn)",
+      "synonyms": {},
+      "source_page": 102,
+      "category": "herb_identification"
+    },
+    {
+      "type": "herb_overview",
+      "herb": "Kaseru",
+      "botanical_name": "Scirpus kysoor Roxb",
+      "content": "Kaseru (Scirpus kysoor Roxb)",
+      "synonyms": {},
+      "source_page": 104,
+      "category": "herb_identification"
+    },
+    {
+      "type": "herb_overview",
+      "herb": "Ketaki",
+      "botanical_name": "Pandanus tectorius  Soland",
+      "content": "Ketaki (Pandanus tectorius  Soland)",
+      "synonyms": {},
+      "source_page": 106,
+      "category": "herb_identification"
+    },
+    {
+      "type": "herb_overview",
+      "herb": "Khadira",
+      "botanical_name": "",
+      "content": "Khadira",
+      "synonyms": {},
+      "source_page": 108,
+      "category": "herb_identification"
+    },
+    {
+      "type": "herb_overview",
+      "herb": "Kiratatikta",
+      "botanical_name": "",
+      "content": "Kiratatikta",
+      "synonyms": {},
+      "source_page": 110,
+      "category": "herb_identification"
+    },
+    {
+      "type": "herb_overview",
+      "herb": "Krishnajiraka",
+      "botanical_name": "Carum carvi Linn",
+      "content": "Krishnajiraka (Carum carvi Linn)",
+      "synonyms": {},
+      "source_page": 113,
+      "category": "herb_identification"
+    },
+    {
+      "type": "herb_overview",
+      "herb": "Kulattha",
+      "botanical_name": "Vigna unquiculata",
+      "content": "Kulattha (Vigna unquiculata)",
+      "synonyms": {},
+      "source_page": 115,
+      "category": "herb_identification"
+    },
+    {
+      "type": "herb_overview",
+      "herb": "Kushta",
+      "botanical_name": "Saussurea lappa",
+      "content": "Kushta (Saussurea lappa)",
+      "synonyms": {},
+      "source_page": 117,
+      "category": "herb_identification"
+    },
+    {
+      "type": "herb_overview",
+      "herb": "Kutaja",
+      "botanical_name": "Holarrhena antidysenterica",
+      "content": "Kutaja (Holarrhena antidysenterica)",
+      "synonyms": {},
+      "source_page": 119,
+      "category": "herb_identification"
+    },
+    {
+      "type": "herb_overview",
+      "herb": "Lavanga",
+      "botanical_name": "",
+      "content": "Lavanga",
+      "synonyms": {},
+      "source_page": 122,
+      "category": "herb_identification"
+    },
+    {
+      "type": "herb_overview",
+      "herb": "Lodhra",
+      "botanical_name": "Symplocos racemosa  Roxb",
+      "content": "Lodhra (Symplocos racemosa  Roxb)",
+      "synonyms": {},
+      "source_page": 124,
+      "category": "herb_identification"
+    },
+    {
+      "type": "herb_overview",
+      "herb": "Madana",
+      "botanical_name": "Xeromphis spinosa",
+      "content": "Madana (Xeromphis spinosa)",
+      "synonyms": {},
+      "source_page": 126,
+      "category": "herb_identification"
+    },
+    {
+      "type": "herb_overview",
+      "herb": "Mishreya",
+      "botanical_name": "",
+      "content": "Mishreya",
+      "synonyms": {},
+      "source_page": 128,
+      "category": "herb_identification"
+    },
+    {
+      "type": "herb_overview",
+      "herb": "Nyagrodha",
+      "botanical_name": "Ficus bengalensis Linn",
+      "content": "Nyagrodha (Ficus bengalensis Linn)",
+      "synonyms": {},
+      "source_page": 130,
+      "category": "herb_identification"
+    },
+    {
+      "type": "herb_overview",
+      "herb": "Pashanabheda",
+      "botanical_name": "Bergenia ciliata",
+      "content": "Pashanabheda (Bergenia ciliata)",
+      "synonyms": {},
+      "source_page": 132,
+      "category": "herb_identification"
+    },
+    {
+      "type": "herb_overview",
+      "herb": "Patha",
+      "botanical_name": "Cissampelos pareira Linn",
+      "content": "Patha (Cissampelos pareira Linn)",
+      "synonyms": {},
+      "source_page": 134,
+      "category": "herb_identification"
+    },
+    {
+      "type": "herb_overview",
+      "herb": "Puga",
+      "botanical_name": "Areca catechu Linn",
+      "content": "Puga (Areca catechu Linn)",
+      "synonyms": {},
+      "source_page": 136,
+      "category": "herb_identification"
+    },
+    {
+      "type": "herb_overview",
+      "herb": "Saptaparna",
+      "botanical_name": "Alstonia scholaris",
+      "content": "Saptaparna (Alstonia scholaris)",
+      "synonyms": {},
+      "source_page": 141,
+      "category": "herb_identification"
+    },
+    {
+      "type": "herb_overview",
+      "herb": "Shati",
+      "botanical_name": "Hedychium spicatum Ham",
+      "content": "Shati (Hedychium spicatum Ham)",
+      "synonyms": {},
+      "source_page": 144,
+      "category": "herb_identification"
+    },
+    {
+      "type": "herb_overview",
+      "herb": "Snuhi",
+      "botanical_name": "Euphorbia neriifolia Linn",
+      "content": "Snuhi (Euphorbia neriifolia Linn)",
+      "synonyms": {},
+      "source_page": 146,
+      "category": "herb_identification"
+    },
+    {
+      "type": "herb_overview",
+      "herb": "Sukshmaila",
+      "botanical_name": "",
+      "content": "Sukshmaila",
+      "synonyms": {},
+      "source_page": 148,
+      "category": "herb_identification"
+    },
+    {
+      "type": "herb_overview",
+      "herb": "Shunthi",
+      "botanical_name": "",
+      "content": "Shunthi",
+      "synonyms": {},
+      "source_page": 150,
+      "category": "herb_identification"
+    },
+    {
+      "type": "herb_overview",
+      "herb": "Svarnapatri",
+      "botanical_name": "",
+      "content": "Svarnapatri",
+      "synonyms": {},
+      "source_page": 152,
+      "category": "herb_identification"
+    },
+    {
+      "type": "herb_overview",
+      "herb": "Svetajiraka",
+      "botanical_name": "",
+      "content": "Svetajiraka",
+      "synonyms": {},
+      "source_page": 154,
+      "category": "herb_identification"
+    },
+    {
+      "type": "herb_overview",
+      "herb": "Sveta Sariva",
+      "botanical_name": "Hemidesmus indicus",
+      "content": "Sveta Sariva (Hemidesmus indicus)",
+      "synonyms": {},
+      "source_page": 156,
+      "category": "herb_identification"
+    },
+    {
+      "type": "herb_overview",
+      "herb": "Tagara",
+      "botanical_name": "Valeriana wallichii",
+      "content": "Tagara (Valeriana wallichii)",
+      "synonyms": {},
+      "source_page": 158,
+      "category": "herb_identification"
+    },
+    {
+      "type": "herb_overview",
+      "herb": "Tamalaki",
+      "botanical_name": "Phyllanthus fraternus Webst",
+      "content": "Tamalaki (Phyllanthus fraternus Webst)",
+      "synonyms": {},
+      "source_page": 160,
+      "category": "herb_identification"
+    },
+    {
+      "type": "herb_overview",
+      "herb": "Tvak",
+      "botanical_name": "",
+      "content": "Tvak",
+      "synonyms": {},
+      "source_page": 163,
+      "category": "herb_identification"
+    },
+    {
+      "type": "herb_overview",
+      "herb": "Tvakapatra",
+      "botanical_name": "Cinnamomum tamala",
+      "content": "Tvakapatra (Cinnamomum tamala)",
+      "synonyms": {},
+      "source_page": 165,
+      "category": "herb_identification"
+    },
+    {
+      "type": "herb_overview",
+      "herb": "Udumbara",
+      "botanical_name": "Ficus racemosa Linn",
+      "content": "Udumbara (Ficus racemosa Linn)",
+      "synonyms": {},
+      "source_page": 167,
+      "category": "herb_identification"
+    },
+    {
+      "type": "herb_overview",
+      "herb": "Upakunchika",
+      "botanical_name": "Nigella sativa Linn",
+      "content": "Upakunchika (Nigella sativa Linn)",
+      "synonyms": {},
+      "source_page": 169,
+      "category": "herb_identification"
+    },
+    {
+      "type": "herb_overview",
+      "herb": "Varuna",
+      "botanical_name": "Crataeva nurvala Buch",
+      "content": "Varuna (Crataeva nurvala Buch)",
+      "synonyms": {},
+      "source_page": 171,
+      "category": "herb_identification"
+    },
+    {
+      "type": "herb_overview",
+      "herb": "Vasa",
+      "botanical_name": "Adhatoda vasica  Nees",
+      "content": "Vasa (Adhatoda vasica  Nees)",
+      "synonyms": {},
+      "source_page": 173,
+      "category": "herb_identification"
+    },
+    {
+      "type": "herb_overview",
+      "herb": "Vidanga",
+      "botanical_name": "Embelia ribes Burm",
+      "content": "Vidanga (Embelia ribes Burm)",
+      "synonyms": {},
+      "source_page": 175,
+      "category": "herb_identification"
+    },
+    {
+      "type": "herb_overview",
+      "herb": "Vijayaa",
+      "botanical_name": "Cannabis sativa Linn",
+      "content": "Vijayaa (Cannabis sativa Linn)",
+      "synonyms": {},
+      "source_page": 178,
+      "category": "herb_identification"
+    },
+    {
+      "type": "herb_overview",
+      "herb": "Yashti",
+      "botanical_name": "Glycyrrhiza glabra Linn",
+      "content": "Yashti (Glycyrrhiza glabra Linn)",
+      "synonyms": {},
+      "source_page": 180,
+      "category": "herb_identification"
+    },
+    {
+      "type": "herb_overview",
+      "herb": "Yaani",
+      "botanical_name": "Trachyspermum ammi",
+      "content": "Yaani (Trachyspermum ammi)",
+      "synonyms": {},
+      "source_page": 182,
+      "category": "herb_identification"
+    }
+  ]
+}

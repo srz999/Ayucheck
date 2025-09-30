@@ -1,0 +1,148 @@
+[
+  {
+    "name": "Ajagandha",
+    "part_used": "Seeds",
+    "botanical_name": "Cleome gynandra Linn.",
+    "family": "Capparidaceae",
+    "synonyms": {
+      "Sanskrit": "Paśugandhā",
+      "English": "Dog Mustard",
+      "Hindi": "Hulhul, Hurhur, Kavalia",
+      "Telugu": "Vaminta, Vayinta",
+      "Tamil": "Nal valai, Nal velai"
+    },
+    "description": "Seeds, 1–2 mm, kidney-shaped, rough, dark brown or black.",
+    "constituents": [
+      "Fixed oil",
+      "Essential oil",
+      "Oleoresin"
+    ],
+    "properties_action": {
+      "rasa": "Kaṭu",
+      "guna": [
+        "Laghu",
+        "Rūkṣa"
+      ],
+      "virya": "Śīta",
+      "vipaka": "Kaṭu",
+      "karma": [
+        "Śūlaghna",
+        "Dīpana",
+        "Hṛdya",
+        "Pittala",
+        "Vātahara"
+      ]
+    },
+    "formulations": [
+      "Nārāyaṇa Cūrṇa"
+    ],
+    "therapeutic_uses": [
+      "Gulma",
+      "Aśṭhīlā",
+      "Kṛmiroga",
+      "Kaṇḍū",
+      "Karṇaroga"
+    ],
+    "dose": "1–3 g powder"
+  },
+  {
+    "name": "Ajamoda",
+    "part_used": "Fruit",
+    "botanical_name": "Apium leptophyllum (Pers.) F.V.M.ex Benth.",
+    "family": "Umbelliferae",
+    "synonyms": {
+      "Sanskrit": "Dīpyaka",
+      "Hindi": "Ajmuda, Ajmod",
+      "Telugu": "Naranji vamu",
+      "Tamil": "Omam"
+    },
+    "description": "Small ovoid fruits, yellowish-brown, aromatic, slightly bitter, 1.5–3 mm long.",
+    "constituents": [
+      "Essential oil",
+      "Fixed oil"
+    ],
+    "properties_action": {
+      "rasa": [
+        "Kaṭu",
+        "Tikta"
+      ],
+      "guna": [
+        "Laghu",
+        "Rūkṣa"
+      ],
+      "virya": "Uṣṇa",
+      "vipaka": "Kaṭu",
+      "karma": [
+        "Dīpana",
+        "Vidāhī",
+        "Kaphavātajit",
+        "Rucikṛt",
+        "Kṛmijit",
+        "Śūlaghna"
+      ]
+    },
+    "formulations": [
+      "Ajamodārka",
+      "Ajamodādi Cūrṇa"
+    ],
+    "therapeutic_uses": [
+      "Gulma",
+      "Aruci",
+      "Ādhmāna",
+      "Hikkā",
+      "Chardi",
+      "Kṛmiroga",
+      "Śūla"
+    ],
+    "dose": "1–3 g powder"
+  },
+  {
+    "name": "Amalaki (Fresh Fruit)",
+    "part_used": "Fruit pulp (fresh)",
+    "botanical_name": "Emblica officinalis Gaertn.",
+    "family": "Euphorbiaceae",
+    "synonyms": {
+      "Sanskrit": "Āmalaka, Amṛtaphala, Dhātrīphala",
+      "English": "Emblic Myrobalan",
+      "Hindi": "Amla, Aonla",
+      "Telugu": "Usirika",
+      "Tamil": "Nellikkai"
+    },
+    "description": "Globose fruit, 2.5–3.5 cm, fleshy, smooth with six lines; sour and astringent, later sweet.",
+    "constituents": [
+      "Ascorbic acid",
+      "Tannins"
+    ],
+    "properties_action": {
+      "rasa": [
+        "Madhura",
+        "Amla",
+        "Kaṭu",
+        "Tikta",
+        "Kaṣāya"
+      ],
+      "guna": [
+        "Laghu",
+        "Rūkṣa"
+      ],
+      "virya": "Śīta",
+      "vipaka": "Madhura",
+      "karma": [
+        "Tridoṣajit",
+        "Vṛṣya",
+        "Rasāyana",
+        "Cakṣuṣya"
+      ]
+    },
+    "formulations": [
+      "Cyavanaprāśa"
+    ],
+    "therapeutic_uses": [
+      "Raktapitta",
+      "Amlapitta",
+      "Prameha",
+      "Dāha"
+    ],
+    "dose": "10–20 g fresh fruit or 5–10 ml juice"
+  }
+]

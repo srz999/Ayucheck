@@ -1,0 +1,62 @@
+{
+  "condition": "Cold (Pratishyaya)",
+  "category": "Ayurveda",
+  "remedies": [
+    {
+      "name": "Tulsi (Holy Basil)",
+      "benefits": ["Natural expectorant", "Relieves cough", "Reduces congestion", "Soothes throat"],
+      "usage": "Drink as tea or chew 3–5 fresh leaves daily",
+      "caution": "Avoid excessive use in pregnancy"
+    },
+    {
+      "name": "Ginger (Adraka / Sunthi)",
+      "benefits": ["Boosts digestion (Agni)", "Reduces inflammation", "Relieves throat pain"],
+      "usage": "Prepare ginger tea with honey or mix 1/2 tsp dry ginger powder in warm water",
+      "caution": "May aggravate acidity if taken in excess"
+    },
+    {
+      "name": "Turmeric (Haridra)",
+      "benefits": ["Anti-inflammatory", "Antiseptic", "Boosts immunity"],
+      "usage": "Drink warm turmeric milk (Golden Milk) at night",
+      "caution": "High doses may thin blood"
+    },
+    {
+      "name": "Pippali (Long Pepper)",
+      "benefits": ["Clears nasal passages", "Reduces phlegm", "Improves lung function"],
+      "usage": "Use 1–2 g with honey or in Trikatu Churna",
+      "caution": "Avoid long-term high doses; can heat the body"
+    },
+    {
+      "name": "Trikatu Churna",
+      "benefits": ["Burns Ama (toxins)", "Clears mucus", "Improves metabolism"],
+      "usage": "Take 1–2 g with honey twice daily",
+      "caution": "Avoid in ulcers or gastritis"
+    },
+    {
+      "name": "Sitopaladi Churna",
+      "benefits": ["Relieves cough", "Soothes respiratory tract", "Supports lung health"],
+      "usage": "Take 1–2 g with honey or warm water twice daily",
+      "caution": "Contains sugar — not suitable for diabetics in large amounts"
+    },
+    {
+      "name": "Chyawanprash",
+      "benefits": ["Rasayana (rejuvenative)", "Boosts immunity", "Strengthens lungs"],
+      "usage": "Take 1–2 tsp daily with warm milk",
+      "caution": "Contains sugar — caution for diabetics"
+    },
+    {
+      "name": "Tulsi-Ginger-Black Pepper Decoction",
+      "benefits": ["Clears congestion", "Relieves headache", "Boosts immunity"],
+      "usage": "Boil Tulsi leaves, ginger, and black pepper in water; drink warm",
+      "caution": "Avoid excess black pepper if prone to acidity"
+    }
+  ],
+  "lifestyle": {
+    "guidelines": [
+      "Drink warm water, avoid cold/iced drinks",
+      "Do steam inhalation with ajwain or eucalyptus oil",
+      "Eat light, digestible food; avoid heavy dairy and oily items",
+      "Keep body warm and take adequate rest"
+    ]
+  }
+}
