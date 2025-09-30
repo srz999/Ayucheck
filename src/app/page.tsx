@@ -95,7 +95,7 @@ export default function HomePage() {
                     </div>
                     <div className="space-y-3">
                       <div className="bg-gray-50 rounded-lg p-3">
-                        <p className="text-sm">👋 Hi! I'm here to help you explore natural healing options. What symptoms would you like to address?</p>
+                        <p className="text-sm">👋 Hi! I&apos;m here to help you explore natural healing options. What symptoms would you like to address?</p>
                       </div>
                       <div className="bg-green-800 text-white rounded-lg p-3 ml-8">
                         <p className="text-sm">I have chronic headaches and stress</p>

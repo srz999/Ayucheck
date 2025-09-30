@@ -27,7 +27,7 @@ export default function Chat() {
               <span className="text-white text-sm">🤖</span>
             </div>
             <div className="bg-white rounded-2xl rounded-tl-none p-4 max-w-md shadow-sm">
-              <p className="text-gray-800">🙏 Namaste! I'm your AyuBot assistant. I'm here to provide guidance on Ayurvedic principles and natural healing methods.</p>
+              <p className="text-gray-800">🙏 Namaste! I&apos;m your AyuBot assistant. I&apos;m here to provide guidance on Ayurvedic principles and natural healing methods.</p>
               <p className="text-sm text-gray-600 mt-2">How can I help you today?</p>
             </div>
           </div>
