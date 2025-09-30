@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AyuCheck.in - Modern Alternative Medicine Platform</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'emerald-custom': '#10B981',
+                        'slate-custom': '#334155',
+                        'purple-custom': '#7C3AED',
+                        'orange-custom': '#F59E0B'
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.5s ease-in-out',
+                        'slide-up': 'slideUp 0.3s ease-out',
+                        'pulse-slow': 'pulse 3s infinite'
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes slideUp {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+        .glassmorphism {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .gradient-text {
+            background: linear-gradient(135deg, #10B981, #7C3AED);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-slate-900 via-purple-900 to-slate-800 min-h-screen text-white">
+    
+    <!-- Navigation -->
+    <nav class="fixed top-0 w-full z-50 glassmorphism">
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <!-- Logo -->
+                <div class="flex items-center space-x-3">
+                    <div class="w-12 h-12 bg-gradient-to-r from-emerald-400 to-purple-500 rounded-xl flex items-center justify-center">
+                        <i class="fas fa-leaf text-white text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-bold gradient-text">AyuCheck.in</h1>
+                        <p class="text-xs text-gray-300">AI-Powered Wellness</p>
+                    </div>
+                </div>
+                
+                <!-- Navigation Links -->
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="#home" class="text-gray-300 hover:text-emerald-400 transition-colors">Home</a>
+                    <a href="#services" class="text-gray-300 hover:text-emerald-400 transition-colors">Services</a>
+                    <a href="#about" class="text-gray-300 hover:text-emerald-400 transition-colors">About</a>
+                    <button class="bg-gradient-to-r from-emerald-500 to-purple-600 px-6 py-2 rounded-full hover:shadow-lg hover:shadow-emerald-500/25 transition-all duration-300">
+                        Get Started
+                    </button>
+                </div>
+                
+                <!-- Mobile Menu -->
+                <button class="md:hidden">
+                    <i class="fas fa-bars text-2xl"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="pt-24 pb-20 px-6">
+        <div class="container mx-auto">
+            <div class="text-center mb-16 animate-fade-in">
+                <div class="inline-flex items-center bg-gradient-to-r from-emerald-500/20 to-purple-500/20 rounded-full px-6 py-2 mb-6">
+                    <i class="fas fa-sparkles text-emerald-400 mr-2"></i>
+                    <span class="text-sm">Powered by Advanced AI Technology</span>
+                </div>
+                <h1 class="text-6xl md:text-7xl font-bold mb-6">
+                    Discover
+                    <span class="gradient-text">Natural Healing</span>
+                    <br>
+                    Like Never Before
+                </h1>
+                <p class="text-xl text-gray-300 mb-8 max-w-2xl mx-auto leading-relaxed">
+                    Experience personalized alternative medicine guidance through Ayurveda, TCM, and Homeopathy with our intelligent AI assistant.
+                </p>
+                <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                    <button class="bg-gradient-to-r from-emerald-500 to-emerald-600 px-8 py-4 rounded-2xl font-semibold hover:shadow-xl hover:shadow-emerald-500/30 transition-all duration-300 transform hover:scale-105">
+                        <i class="fas fa-comments mr-2"></i>
+                        Start Free Consultation
+                    </button>
+                    <button class="border border-purple-500 px-8 py-4 rounded-2xl font-semibold hover:bg-purple-500/10 transition-all duration-300">
+                        <i class="fas fa-play mr-2"></i>
+                        Watch Demo
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Floating Chat Interface -->
+    <div class="fixed bottom-8 right-8 z-40">
+        <div class="bg-gradient-to-br from-white to-gray-50 rounded-3xl shadow-2xl w-80 h-96 hidden" id="floatingChat">
+            <!-- Chat Header -->
+            <div class="bg-gradient-to-r from-emerald-500 to-purple-600 p-4 rounded-t-3xl">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center mr-3">
+                            <i class="fas fa-robot text-white"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-white">AyuBot Pro</h4>
+                            <div class="flex items-center">
+                                <div class="w-2 h-2 bg-green-400 rounded-full mr-1 animate-pulse"></div>
+                                <span class="text-xs text-white/80">Online</span>
+                            </div>
+                        </div>
+                    </div>
+                    <button id="closeChatBtn" class="text-white/80 hover:text-white">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Chat Messages -->
+            <div class="p-4 h-64 overflow-y-auto" id="chatMessages">
+                <div class="space-y-4">
+                    <!-- Bot Message -->
+                    <div class="flex items-start">
+                        <div class="w-8 h-8 bg-gradient-to-r from-emerald-400 to-purple-500 rounded-full flex items-center justify-center mr-2 flex-shrink-0">
+                            <i class="fas fa-leaf text-white text-xs"></i>
+                        </div>
+                        <div class="bg-gray-100 rounded-2xl rounded-tl-sm p-3 max-w-xs">
+                            <p class="text-gray-800 text-sm">🌟 Welcome! I'm AyuBot Pro, your personal wellness assistant. What brings you here today?</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Quick Actions -->
+                    <div class="flex flex-wrap gap-2 ml-10">
+                        <button class="quick-btn bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-xs hover:bg-emerald-200 transition">
+                            🧘 Stress Relief
+                        </button>
+                        <button class="quick-btn bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-xs hover:bg-purple-200 transition">
+                            😴 Sleep Better
+                        </button>
+                        <button class="quick-btn bg-orange-100 text-orange-700 px-3 py-1 rounded-full text-xs hover:bg-orange-200 transition">
+                            🌿 Natural Remedies
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Chat Input -->
+            <div class="p-4 border-t border-gray-200">
+                <div class="flex items-center space-x-2">
+                    <input type="text" placeholder="Ask about natural healing..." 
+                           class="flex-1 bg-gray-100 rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400">
+                    <button class="bg-gradient-to-r from-emerald-500 to-purple-600 p-2 rounded-full text-white hover:shadow-lg transition">
+                        <i class="fas fa-paper-plane text-sm"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Chat Toggle Button -->
+        <button id="chatToggle" class="bg-gradient-to-r from-emerald-500 to-purple-600 w-16 h-16 rounded-full shadow-2xl hover:shadow-emerald-500/30 transition-all duration-300 flex items-center justify-center group">
+            <i class="fas fa-comments text-white text-xl group-hover:scale-110 transition-transform"></i>
+        </button>
+    </div>
+
+    <!-- Services Grid -->
+    <section class="py-20 px-6" id="services">
+        <div class="container mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold mb-4">
+                    Healing Modalities
+                    <span class="gradient-text">We Offer</span>
+                </h2>
+                <p class="text-gray-400 max-w-2xl mx-auto">
+                    Explore ancient wisdom combined with modern AI to guide your wellness journey
+                </p>
+            </div>
+            
+            <div class="grid md:grid-cols-3 gap-8">
+                <!-- Ayurveda Card -->
+                <div class="group bg-gradient-to-br from-emerald-900/30 to-emerald-800/30 p-8 rounded-3xl border border-emerald-500/20 hover:border-emerald-500/50 transition-all duration-300 hover:transform hover:scale-105">
+                    <div class="w-16 h-16 bg-gradient-to-r from-emerald-400 to-emerald-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                        <i class="fas fa-om text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-4 text-emerald-400">Ayurveda</h3>
+                    <p class="text-gray-300 mb-6">Ancient Indian healing system focusing on balance and natural remedies</p>
+                    <ul class="space-y-2 mb-6">
+                        <li class="flex items-center text-sm text-gray-300">
+                            <i class="fas fa-check text-emerald-400 mr-2"></i>
+                            Dosha Analysis
+                        </li>
+                        <li class="flex items-center text-sm text-gray-300">
+                            <i class="fas fa-check text-emerald-400 mr-2"></i>
+                            Herbal Recommendations
+                        </li>
+                        <li class="flex items-center text-sm text-gray-300">
+                            <i class="fas fa-check text-emerald-400 mr-2"></i>
+                            Lifestyle Guidance
+                        </li>
+                    </ul>
+                    <button class="w-full bg-emerald-600 hover:bg-emerald-500 py-3 rounded-xl font-semibold transition-colors">
+                        Explore Ayurveda
+                    </button>
+                </div>
+                
+                <!-- TCM Card -->
+                <div class="group bg-gradient-to-br from-purple-900/30 to-purple-800/30 p-8 rounded-3xl border border-purple-500/20 hover:border-purple-500/50 transition-all duration-300 hover:transform hover:scale-105">
+                    <div class="w-16 h-16 bg-gradient-to-r from-purple-400 to-purple-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                        <i class="fas fa-yin-yang text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-4 text-purple-400">Chinese Medicine</h3>
+                    <p class="text-gray-300 mb-6">Traditional healing focusing on energy flow and harmony</p>
+                    <ul class="space-y-2 mb-6">
+                        <li class="flex items-center text-sm text-gray-300">
+                            <i class="fas fa-check text-purple-400 mr-2"></i>
+                            Qi Assessment
+                        </li>
+                        <li class="flex items-center text-sm text-gray-300">
+                            <i class="fas fa-check text-purple-400 mr-2"></i>
+                            Acupressure Points
+                        </li>
+                        <li class="flex items-center text-sm text-gray-300">
+                            <i class="fas fa-check text-purple-400 mr-2"></i>
+                            Herbal Formulas
+                        </li>
+                    </ul>
+                    <button class="w-full bg-purple-600 hover:bg-purple-500 py-3 rounded-xl font-semibold transition-colors">
+                        Explore TCM
+                    </button>
+                </div>
+                
+                <!-- Homeopathy Card -->
+                <div class="group bg-gradient-to-br from-blue-900/30 to-blue-800/30 p-8 rounded-3xl border border-blue-500/20 hover:border-blue-500/50 transition-all duration-300 hover:transform hover:scale-105">
+                    <div class="w-16 h-16 bg-gradient-to-r from-blue-400 to-blue-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                        <i class="fas fa-tint text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-4 text-blue-400">Homeopathy</h3>
+                    <p class="text-gray-300 mb-6">Gentle healing through natural, highly diluted substances</p>
+                    <ul class="space-y-2 mb-6">
+                        <li class="flex items-center text-sm text-gray-300">
+                            <i class="fas fa-check text-blue-400 mr-2"></i>
+                            Constitutional Analysis
+                        </li>
+                        <li class="flex items-center text-sm text-gray-300">
+                            <i class="fas fa-check text-blue-400 mr-2"></i>
+                            Remedy Selection
+                        </li>
+                        <li class="flex items-center text-sm text-gray-300">
+                            <i class="fas fa-check text-blue-400 mr-2"></i>
+                            Potency Guidance
+                        </li>
+                    </ul>
+                    <button class="w-full bg-blue-600 hover:bg-blue-500 py-3 rounded-xl font-semibold transition-colors">
+                        Explore Homeopathy
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="py-20 px-6">
+        <div class="container mx-auto">
+            <div class="grid md:grid-cols-2 gap-16 items-center">
+                <!-- Left Content -->
+                <div>
+                    <h2 class="text-4xl font-bold mb-8">
+                        Why Choose
+                        <span class="gradient-text">AyuCheck.in?</span>
+                    </h2>
+                    
+                    <div class="space-y-6">
+                        <div class="flex items-start">
+                            <div class="w-12 h-12 bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-xl flex items-center justify-center mr-4 flex-shrink-0">
+                                <i class="fas fa-brain text-white"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-xl font-semibold mb-2 text-emerald-400">AI-Powered Intelligence</h4>
+                                <p class="text-gray-300">Advanced machine learning trained on thousands of traditional medicine texts and modern research.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start">
+                            <div class="w-12 h-12 bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl flex items-center justify-center mr-4 flex-shrink-0">
+                                <i class="fas fa-user-md text-white"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-xl font-semibold mb-2 text-purple-400">Personalized Approach</h4>
+                                <p class="text-gray-300">Tailored recommendations based on your unique constitution, lifestyle, and health goals.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start">
+                            <div class="w-12 h-12 bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl flex items-center justify-center mr-4 flex-shrink-0">
+                                <i class="fas fa-shield-alt text-white"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-xl font-semibold mb-2 text-orange-400">Safe & Natural</h4>
+                                <p class="text-gray-300">Evidence-based natural remedies with comprehensive safety profiles and interaction checks.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Right Content -->
+                <div class="relative">
+                    <div class="bg-gradient-to-br from-emerald-500/10 to-purple-500/10 rounded-3xl p-8 glassmorphism">
+                        <div class="text-center">
+                            <div class="w-24 h-24 bg-gradient-to-r from-emerald-400 to-purple-500 rounded-full flex items-center justify-center mx-auto mb-6 pulse-slow">
+                                <i class="fas fa-heartbeat text-white text-3xl"></i>
+                            </div>
+                            <h3 class="text-2xl font-bold mb-4">24/7 Wellness Support</h3>
+                            <p class="text-gray-300 mb-6">Get instant guidance whenever you need it, from anywhere in the world.</p>
+                            <div class="grid grid-cols-2 gap-4 text-center">
+                                <div>
+                                    <div class="text-2xl font-bold text-emerald-400">50K+</div>
+                                    <div class="text-sm text-gray-400">Users Helped</div>
+                                </div>
+                                <div>
+                                    <div class="text-2xl font-bold text-purple-400">98%</div>
+                                    <div class="text-sm text-gray-400">Satisfaction</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900/50 py-16 px-6 border-t border-gray-800">
+        <div class="container mx-auto">
+            <div class="grid md:grid-cols-4 gap-8">
+                <!-- Company Info -->
+                <div>
+                    <div class="flex items-center space-x-3 mb-6">
+                        <div class="w-10 h-10 bg-gradient-to-r from-emerald-400 to-purple-500 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-leaf text-white"></i>
+                        </div>
+                        <div>
+                            <h5 class="text-xl font-bold gradient-text">AyuCheck.in</h5>
+                            <p class="text-xs text-gray-400">AI-Powered Wellness</p>
+                        </div>
+                    </div>
+                    <p class="text-gray-400 text-sm mb-6">
+                        Revolutionizing alternative medicine through advanced AI technology and ancient wisdom.
+                    </p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="w-10 h-10 bg-gradient-to-r from-emerald-500 to-purple-600 rounded-full flex items-center justify-center hover:shadow-lg hover:shadow-emerald-500/25 transition-all">
+                            <i class="fab fa-twitter text-white"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 bg-gradient-to-r from-emerald-500 to-purple-600 rounded-full flex items-center justify-center hover:shadow-lg hover:shadow-emerald-500/25 transition-all">
+                            <i class="fab fa-facebook text-white"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 bg-gradient-to-r from-emerald-500 to-purple-600 rounded-full flex items-center justify-center hover:shadow-lg hover:shadow-emerald-500/25 transition-all">
+                            <i class="fab fa-instagram text-white"></i>
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Quick Links -->
+                <div>
+                    <h6 class="text-lg font-semibold mb-4 text-emerald-400">Quick Links</h6>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-emerald-400 transition-colors text-sm">Home</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-emerald-400 transition-colors text-sm">Services</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-emerald-400 transition-colors text-sm">About Us</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-emerald-400 transition-colors text-sm">Contact</a></li>
+                    </ul>
+                </div>
+                
+                <!-- Services -->
+                <div>
+                    <h6 class="text-lg font-semibold mb-4 text-purple-400">Services</h6>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-purple-400 transition-colors text-sm">Ayurveda Consultation</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-purple-400 transition-colors text-sm">TCM Analysis</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-purple-400 transition-colors text-sm">Homeopathy Guide</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-purple-400 transition-colors text-sm">Wellness Plans</a></li>
+                    </ul>
+                </div>
+                
+                <!-- Contact -->
+                <div>
+                    <h6 class="text-lg font-semibold mb-4 text-orange-400">Contact</h6>
+                    <div class="space-y-3">
+                        <div class="flex items-center">
+                            <i class="fas fa-envelope text-orange-400 mr-3"></i>
+                            <a href="mailto:hello@ayucheck.in" class="text-gray-400 hover:text-orange-400 transition-colors text-sm">
+                                hello@ayucheck.in
+                            </a>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-globe text-orange-400 mr-3"></i>
+                            <span class="text-gray-400 text-sm">24/7 AI Support</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-800 mt-12 pt-8 text-center">
+                <p class="text-gray-400 text-sm">
+                    © 2025 AyuCheck.in. All rights reserved. | 
+                    <a href="#" class="hover:text-emerald-400 transition-colors">Privacy Policy</a> | 
+                    <a href="#" class="hover:text-emerald-400 transition-colors">Terms of Service</a>
+                </p>
+                <p class="text-xs text-gray-500 mt-2">
+                    <strong>Disclaimer:</strong> This platform provides educational information only. Always consult healthcare professionals before starting any treatment.
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script>
+        // Floating Chat Toggle
+        const chatToggle = document.getElementById('chatToggle');
+        const floatingChat = document.getElementById('floatingChat');
+        const closeChatBtn = document.getElementById('closeChatBtn');
+        const chatMessages = document.getElementById('chatMessages');
+
+        let isChatOpen = false;
+
+        chatToggle.addEventListener('click', function() {
+            if (isChatOpen) {
+                floatingChat.classList.add('hidden');
+                chatToggle.innerHTML = '<i class="fas fa-comments text-white text-xl group-hover:scale-110 transition-transform"></i>';
+                isChatOpen = false;
+            } else {
+                floatingChat.classList.remove('hidden');
+                floatingChat.classList.add('animate-slide-up');
+                chatToggle.innerHTML = '<i class="fas fa-times text-white text-xl group-hover:scale-110 transition-transform"></i>';
+                isChatOpen = true;
+            }
+        });
+
+        closeChatBtn.addEventListener('click', function() {
+            floatingChat.classList.add('hidden');
+            chatToggle.innerHTML = '<i class="fas fa-comments text-white text-xl group-hover:scale-110 transition-transform"></i>';
+            isChatOpen = false;
+        });
+
+        // Quick Button Responses
+        document.querySelectorAll('.quick-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const messageText = this.textContent.trim();
+                addMessage(messageText, 'user');
+
+                setTimeout(() => {
+                    let response = '';
+                    if (messageText.includes('Stress')) {
+                        response = '🌟 For stress relief, I recommend deep breathing exercises, Ashwagandha supplementation, and meditation. Would you like a personalized stress-relief plan?';
+                    } else if (messageText.includes('Sleep')) {
+                        response = '😴 Better sleep can be achieved through chamomile tea, establishing a bedtime routine, and avoiding screens before bed. What time do you usually go to sleep?';
+                    } else if (messageText.includes('Remedies')) {
+                        response = '🌿 Natural remedies vary based on your specific needs. Could you tell me what condition you\'d like to address naturally?';
+                    }
+                    addMessage(response, 'bot');
+                }, 1000);
+            });
+        });
+
+        function addMessage(text, sender) {
+            const messageDiv = document.createElement('div');
+            
+            if (sender === 'user') {
+                messageDiv.innerHTML = `
+                    <div class="flex justify-end mb-4">
+                        <div class="bg-gradient-to-r from-emerald-500 to-purple-600 text-white rounded-2xl rounded-tr-sm p-3 max-w-xs">
+                            <p class="text-sm">${text}</p>
+                        </div>
+                    </div>
+                `;
+            } else {
+                messageDiv.innerHTML = `
+                    <div class="flex items-start mb-4">
+                        <div class="w-8 h-8 bg-gradient-to-r from-emerald-400 to-purple-500 rounded-full flex items-center justify-center mr-2 flex-shrink-0">
+                            <i class="fas fa-leaf text-white text-xs"></i>
+                        </div>
+                        <div class="bg-gray-100 rounded-2xl rounded-tl-sm p-3 max-w-xs">
+                            <p class="text-gray-800 text-sm">${text}</p>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // Smooth Scrolling
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Animate elements on scroll
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -100px 0px'
+        };
+
+        const observer = new IntersectionObserver(function(entries) {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('animate-fade-in');
+                }
+            });
+        }, observerOptions);
+
+        // Observe all cards and sections
+        document.querySelectorAll('.group, section').forEach(el => {
+            observer.observe(el);
+        });
+    </script>
+</body>
+</html>

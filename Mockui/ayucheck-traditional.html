@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AyuCheck.in - Ancient Wisdom, Modern Healing</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'ayur-saffron': '#E67E22',
+                        'ayur-white': '#FDF6E3',
+                        'ayur-green': '#27AE60',
+                        'tcm-red': '#C0392B',
+                        'tcm-gold': '#F39C12',
+                        'tcm-black': '#2C3E50',
+                        'homeo-blue': '#3498DB',
+                        'homeo-silver': '#95A5A6',
+                        'earth-brown': '#8B4513',
+                        'sage-green': '#7FB069',
+                        'lotus-pink': '#E8B4B8',
+                        'warm-cream': '#FAF0E6',
+                        'deep-teal': '#16A085',
+                        'soft-purple': '#9B59B6',
+                        'golden-yellow': '#F1C40F'
+                    },
+                    fontFamily: {
+                        'sanskrit': ['Noto Sans Devanagari', 'serif'],
+                        'chinese': ['Noto Sans SC', 'sans-serif'],
+                        'elegant': ['Crimson Text', 'serif']
+                    },
+                    backgroundImage: {
+                        'ayur-pattern': "url('data:image/svg+xml,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 100\"><defs><pattern id=\"lotus\" patternUnits=\"userSpaceOnUse\" width=\"20\" height=\"20\"><circle cx=\"10\" cy=\"10\" r=\"2\" fill=\"%23FF9933\" opacity=\"0.1\"/></pattern></defs><rect width=\"100\" height=\"100\" fill=\"url(%23lotus)\"/></svg>')",
+                        'bamboo-pattern': "url('data:image/svg+xml,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 100\"><defs><pattern id=\"bamboo\" patternUnits=\"userSpaceOnUse\" width=\"10\" height=\"20\"><line x1=\"5\" y1=\"0\" x2=\"5\" y2=\"20\" stroke=\"%23138808\" stroke-width=\"0.5\" opacity=\"0.2\"/></pattern></defs><rect width=\"100\" height=\"100\" fill=\"url(%23bamboo)\"/></svg>')"
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;1,400&family=Noto+Sans+Devanagari:wght@400;500;700&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    
+    <style>
+        .mandala-bg {
+            background: radial-gradient(circle, rgba(255,153,51,0.1) 0%, rgba(19,136,8,0.05) 50%, transparent 100%),
+                        conic-gradient(from 0deg, transparent 0deg, rgba(255,215,0,0.1) 90deg, transparent 180deg, rgba(220,20,60,0.1) 270deg, transparent 360deg);
+        }
+        
+        .yin-yang-shadow {
+            box-shadow: 
+                inset 0 0 20px rgba(220,20,60,0.2),
+                0 0 30px rgba(255,215,0,0.3);
+        }
+        
+        .lotus-float {
+            animation: lotusFloat 6s ease-in-out infinite;
+        }
+        
+        .chi-flow {
+            animation: chiFlow 4s linear infinite;
+        }
+        
+        .homeo-ripple {
+            animation: homeoRipple 3s ease-out infinite;
+        }
+        
+        @keyframes lotusFloat {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            33% { transform: translateY(-10px) rotate(2deg); }
+            66% { transform: translateY(5px) rotate(-1deg); }
+        }
+        
+        @keyframes chiFlow {
+            0% { transform: translateX(-100%) scale(0.5); opacity: 0; }
+            50% { opacity: 1; }
+            100% { transform: translateX(100%) scale(1); opacity: 0; }
+        }
+        
+        @keyframes homeoRipple {
+            0% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(1.5); opacity: 0; }
+        }
+        
+        .traditional-border {
+            border-image: linear-gradient(45deg, #FF9933, #FFD700, #DC143C, #4682B4) 1;
+        }
+        
+        .scroll-fade {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s ease-out;
+        }
+        
+        .scroll-fade.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+
+<body class="bg-gradient-to-br from-warm-cream via-ayur-white to-blue-50 min-h-screen relative overflow-x-hidden">
+    
+    <!-- Decorative Background Elements -->
+    <div class="fixed inset-0 pointer-events-none z-0">
+        <div class="absolute top-10 left-10 w-32 h-32 bg-ayur-pattern rounded-full opacity-20 lotus-float"></div>
+        <div class="absolute top-40 right-20 w-24 h-24 bg-bamboo-pattern rounded-full opacity-15 lotus-float" style="animation-delay: 2s;"></div>
+        <div class="absolute bottom-20 left-1/4 w-40 h-40 mandala-bg rounded-full opacity-30"></div>
+        <div class="absolute top-1/2 right-10 w-20 h-20 yin-yang-shadow rounded-full bg-gradient-to-br from-tcm-red to-tcm-gold opacity-20 lotus-float" style="animation-delay: 4s;"></div>
+    </div>
+
+    <!-- Header with Traditional Elements -->
+    <header class="relative z-20 bg-gradient-to-r from-ayur-saffron via-golden-yellow to-deep-teal bg-opacity-90 backdrop-blur-md shadow-2xl">
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <!-- Ornate Logo -->
+                <div class="flex items-center space-x-4">
+                    <div class="relative">
+                        <div class="w-16 h-16 bg-gradient-to-br from-warm-cream to-ayur-saffron rounded-full flex items-center justify-center shadow-lg border-4 border-golden-yellow">
+                            <div class="w-10 h-10 bg-gradient-to-br from-ayur-green to-sage-green rounded-full flex items-center justify-center">
+                                <i class="fas fa-om text-warm-cream text-lg"></i>
+                            </div>
+                        </div>
+                        <div class="absolute -top-2 -right-2 w-6 h-6 bg-tcm-red rounded-full flex items-center justify-center">
+                            <i class="fas fa-yin-yang text-white text-xs"></i>
+                        </div>
+                    </div>
+                    <div>
+                        <h1 class="text-3xl font-sanskrit font-bold text-transparent bg-clip-text bg-gradient-to-r from-ayur-green via-tcm-red to-deep-teal">
+                            आयुCheck.in
+                        </h1>
+                        <p class="text-sm text-earth-brown font-elegant italic">Ancient Wisdom • Modern Guidance</p>
+                    </div>
+                </div>
+                
+                <!-- Traditional Navigation -->
+                <nav class="hidden lg:flex items-center space-x-8">
+                    <a href="#home" class="group flex items-center text-earth-brown hover:text-ayur-saffron transition-colors font-elegant">
+                        <i class="fas fa-home mr-2 group-hover:scale-110 transition-transform"></i>
+                        गृह (Home)
+                    </a>
+                    <a href="#therapies" class="group flex items-center text-earth-brown hover:text-tcm-red transition-colors font-chinese">
+                        <i class="fas fa-leaf mr-2 group-hover:scale-110 transition-transform"></i>
+                        療法 (Therapies)
+                    </a>
+                    <a href="#wisdom" class="group flex items-center text-earth-brown hover:text-homeo-blue transition-colors font-elegant">
+                        <i class="fas fa-book mr-2 group-hover:scale-110 transition-transform"></i>
+                        Wisdom
+                    </a>
+                    <button class="bg-gradient-to-r from-ayur-saffron via-golden-yellow to-deep-teal text-white px-8 py-3 rounded-full font-sanskrit font-bold hover:shadow-xl hover:scale-105 transition-all duration-300 border-2 border-warm-cream">
+                        🙏 प्रारम्भ (Begin)
+                    </button>
+                </nav>
+                
+                <!-- Mobile Menu -->
+                <button class="lg:hidden text-earth-brown text-2xl">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section with Traditional Aesthetics -->
+    <section class="relative py-20 px-6 overflow-hidden">
+        <!-- Traditional Decorative Elements -->
+        <div class="absolute inset-0 opacity-10">
+            <div class="absolute top-0 left-0 w-full h-full bg-ayur-pattern"></div>
+            <div class="absolute top-0 right-0 w-1/2 h-full bg-bamboo-pattern"></div>
+        </div>
+        
+        <div class="container mx-auto text-center relative z-10">
+            <!-- Traditional Blessing -->
+            <div class="mb-8">
+                <div class="inline-flex items-center bg-gradient-to-r from-ayur-saffron/20 to-golden-yellow/20 rounded-full px-8 py-3 backdrop-blur-md border border-ayur-saffron/30">
+                    <i class="fas fa-om text-ayur-saffron mr-3"></i>
+                    <span class="font-sanskrit text-ayur-green">सर्वे भवन्तु सुखिनः • 願所有眾生安樂 • Similia Similibus Curentur</span>
+                    <i class="fas fa-yin-yang text-tcm-red ml-3"></i>
+                </div>
+            </div>
+            
+            <!-- Main Heading with Cultural Typography -->
+            <h1 class="text-6xl lg:text-8xl font-bold mb-8 leading-tight">
+                <span class="font-sanskrit text-transparent bg-clip-text bg-gradient-to-r from-ayur-saffron to-ayur-green block mb-2">
+                    आयुर्वेद
+                </span>
+                <span class="font-chinese text-transparent bg-clip-text bg-gradient-to-r from-tcm-red to-tcm-gold block mb-2">
+                    中醫學
+                </span>
+                <span class="font-elegant text-transparent bg-clip-text bg-gradient-to-r from-homeo-blue to-homeo-silver">
+                    Homœopathy
+                </span>
+            </h1>
+            
+            <p class="text-2xl text-earth-brown mb-12 max-w-4xl mx-auto font-elegant leading-relaxed">
+                "Where ancient healing traditions meet modern AI wisdom. Experience the profound unity of 
+                <em class="text-ayur-saffron">Panchamahabhutas</em>, 
+                <em class="text-tcm-red">Qi energy flow</em>, and 
+                <em class="text-homeo-blue">like cures like</em> philosophy."
+            </p>
+            
+            <!-- Traditional CTA Buttons -->
+            <div class="flex flex-col sm:flex-row gap-6 justify-center items-center">
+                <button class="group bg-gradient-to-r from-ayur-saffron to-ayur-green text-white px-10 py-5 rounded-full font-sanskrit text-xl font-bold hover:shadow-2xl hover:shadow-ayur-saffron/50 transition-all duration-500 transform hover:scale-105 border-3 border-warm-cream">
+                    <i class="fas fa-lotus mr-3 group-hover:rotate-180 transition-transform duration-500"></i>
+                    प्रारंभ परामर्श
+                    <span class="block text-sm font-elegant opacity-80">Begin Consultation</span>
+                </button>
+                <button class="group border-3 border-tcm-red text-tcm-red px-10 py-5 rounded-full font-chinese text-xl font-bold hover:bg-tcm-red hover:text-white transition-all duration-500 backdrop-blur-md bg-white/50">
+                    <i class="fas fa-dragon mr-3 group-hover:scale-110 transition-transform"></i>
+                    智慧探索
+                    <span class="block text-sm font-elegant opacity-80">Explore Wisdom</span>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Floating Traditional Elements -->
+        <div class="absolute top-20 left-10 w-20 h-20 chi-flow opacity-30">
+            <i class="fas fa-leaf text-sage-green text-4xl"></i>
+        </div>
+        <div class="absolute bottom-20 right-10 w-16 h-16 homeo-ripple opacity-40">
+            <i class="fas fa-tint text-homeo-blue text-3xl"></i>
+        </div>
+    </section>
+
+    <!-- Traditional Therapy Showcase -->
+    <section id="therapies" class="py-20 px-6 relative">
+        <div class="container mx-auto">
+            <!-- Section Header with Traditional Styling -->
+            <div class="text-center mb-16 scroll-fade">
+                <div class="inline-block mb-6">
+                    <h2 class="text-5xl font-bold">
+                        <span class="font-sanskrit text-ayur-saffron">त्रयोदश</span>
+                        <span class="font-chinese text-tcm-red mx-4">三大</span>
+                        <span class="font-elegant text-homeo-blue">Healing Arts</span>
+                    </h2>
+                    <div class="w-32 h-1 bg-gradient-to-r from-ayur-saffron via-tcm-red to-deep-teal mx-auto mt-4 rounded-full"></div>
+                </div>
+                <p class="text-xl text-earth-brown font-elegant max-w-3xl mx-auto">
+                    Experience the sacred traditions that have healed humanity for millennia, now guided by artificial intelligence
+                </p>
+            </div>
+            
+            <!-- Therapy Cards with Cultural Authenticity -->
+            <div class="grid lg:grid-cols-3 gap-12">
+                
+                <!-- Ayurveda Card -->
+                <div class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-ayur-saffron/10 to-ayur-green/10 backdrop-blur-md border-2 border-ayur-saffron/30 hover:border-ayur-saffron transition-all duration-500 scroll-fade">
+                    <!-- Traditional Pattern Background -->
+                    <div class="absolute inset-0 bg-ayur-pattern opacity-20"></div>
+                    
+                    <!-- Card Content -->
+                    <div class="relative p-8">
+                        <!-- Traditional Header -->
+                        <div class="text-center mb-8">
+                            <div class="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-ayur-saffron to-ayur-green rounded-full flex items-center justify-center shadow-2xl border-4 border-warm-cream group-hover:scale-110 group-hover:rotate-12 transition-all duration-500">
+                                <i class="fas fa-om text-white text-3xl"></i>
+                            </div>
+                            <h3 class="text-3xl font-sanskrit font-bold text-ayur-green mb-2">आयुर्वेद</h3>
+                            <p class="font-elegant text-ayur-saffron text-lg italic">The Science of Life</p>
+                            <div class="w-16 h-0.5 bg-ayur-saffron mx-auto mt-3"></div>
+                        </div>
+                        
+                        <!-- Traditional Elements -->
+                        <div class="space-y-4 mb-8">
+                            <div class="flex items-center bg-warm-cream/80 rounded-xl p-4 backdrop-blur-sm">
+                                <div class="w-10 h-10 bg-ayur-saffron rounded-full flex items-center justify-center mr-4">
+                                    <i class="fas fa-fire text-white"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-sanskrit font-bold text-ayur-green">वात-पित्त-कफ</h4>
+                                    <p class="text-sm text-earth-brown">Dosha Constitution Analysis</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center bg-warm-cream/80 rounded-xl p-4 backdrop-blur-sm">
+                                <div class="w-10 h-10 bg-sage-green rounded-full flex items-center justify-center mr-4">
+                                    <i class="fas fa-seedling text-white"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-sanskrit font-bold text-ayur-green">रसायन</h4>
+                                    <p class="text-sm text-earth-brown">Herbal Rasayana Medicines</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center bg-warm-cream/80 rounded-xl p-4 backdrop-blur-sm">
+                                <div class="w-10 h-10 bg-lotus-pink rounded-full flex items-center justify-center mr-4">
+                                    <i class="fas fa-lotus mr-1 text-white"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-sanskrit font-bold text-ayur-green">पंचकर्म</h4>
+                                    <p class="text-sm text-earth-brown">Detoxification Therapies</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <button class="w-full bg-gradient-to-r from-ayur-saffron to-ayur-green text-white py-4 rounded-xl font-sanskrit font-bold text-lg hover:shadow-2xl hover:shadow-ayur-saffron/50 transition-all duration-300 group-hover:scale-105">
+                            🙏 आयुर्वेद परामर्श
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Traditional Chinese Medicine Card -->
+                <div class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-tcm-red/10 to-tcm-gold/10 backdrop-blur-md border-2 border-tcm-red/30 hover:border-tcm-red transition-all duration-500 scroll-fade">
+                    <!-- Dragon Pattern Background -->
+                    <div class="absolute inset-0 opacity-10">
+                        <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-tcm-red to-tcm-gold rounded-full transform rotate-45"></div>
+                        <div class="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-tcm-gold to-tcm-red rounded-full transform -rotate-12"></div>
+                    </div>
+                    
+                    <div class="relative p-8">
+                        <!-- Traditional Header -->
+                        <div class="text-center mb-8">
+                            <div class="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-tcm-red to-golden-yellow rounded-full flex items-center justify-center shadow-2xl border-4 border-white yin-yang-shadow group-hover:scale-110 group-hover:rotate-180 transition-all duration-700">
+                                <i class="fas fa-yin-yang text-white text-3xl"></i>
+                            </div>
+                            <h3 class="text-3xl font-chinese font-bold text-tcm-red mb-2">中醫學</h3>
+                            <p class="font-elegant text-golden-yellow text-lg italic">Traditional Chinese Medicine</p>
+                            <div class="w-16 h-0.5 bg-tcm-red mx-auto mt-3"></div>
+                        </div>
+                        
+                        <!-- Traditional Elements -->
+                        <div class="space-y-4 mb-8">
+                            <div class="flex items-center bg-white/70 rounded-xl p-4 backdrop-blur-sm">
+                                <div class="w-10 h-10 bg-tcm-red rounded-full flex items-center justify-center mr-4">
+                                    <i class="fas fa-wind text-white"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-chinese font-bold text-tcm-red">氣血調和</h4>
+                                    <p class="text-sm text-earth-brown">Qi & Blood Harmony</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center bg-white/70 rounded-xl p-4 backdrop-blur-sm">
+                                <div class="w-10 h-10 bg-golden-yellow rounded-full flex items-center justify-center mr-4">
+                                    <i class="fas fa-leaf text-white"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-chinese font-bold text-tcm-red">中藥方劑</h4>
+                                    <p class="text-sm text-earth-brown">Herbal Formula Prescriptions</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center bg-white/70 rounded-xl p-4 backdrop-blur-sm">
+                                <div class="w-10 h-10 bg-earth-brown rounded-full flex items-center justify-center mr-4">
+                                    <i class="fas fa-hand-sparkles text-white"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-chinese font-bold text-tcm-red">經絡穴位</h4>
+                                    <p class="text-sm text-earth-brown">Meridian Acupoint Therapy</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <button class="w-full bg-gradient-to-r from-tcm-red to-golden-yellow text-white py-4 rounded-xl font-chinese font-bold text-lg hover:shadow-2xl hover:shadow-tcm-red/50 transition-all duration-300 group-hover:scale-105">
+                            🐉 中醫諮詢
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Homeopathy Card -->
+                <div class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-homeo-blue/10 to-homeo-silver/10 backdrop-blur-md border-2 border-homeo-blue/30 hover:border-homeo-blue transition-all duration-500 scroll-fade">
+                    <!-- Water Pattern Background -->
+                    <div class="absolute inset-0 opacity-20">
+                        <div class="absolute inset-0 bg-gradient-to-br from-homeo-blue/20 to-homeo-silver/20 rounded-full homeo-ripple"></div>
+                    </div>
+                    
+                    <div class="relative p-8">
+                        <!-- Traditional Header -->
+                        <div class="text-center mb-8">
+                            <div class="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-deep-teal to-homeo-silver rounded-full flex items-center justify-center shadow-2xl border-4 border-white group-hover:scale-110 group-hover:rotate-12 transition-all duration-500">
+                                <i class="fas fa-tint text-white text-3xl"></i>
+                            </div>
+                            <h3 class="text-3xl font-elegant font-bold text-deep-teal mb-2">Homœopathy</h3>
+                            <p class="font-elegant text-homeo-silver text-lg italic">"Similia Similibus Curentur"</p>
+                            <div class="w-16 h-0.5 bg-deep-teal mx-auto mt-3"></div>
+                        </div>
+                        
+                        <!-- Traditional Elements -->
+                        <div class="space-y-4 mb-8">
+                            <div class="flex items-center bg-white/80 rounded-xl p-4 backdrop-blur-sm">
+                                <div class="w-10 h-10 bg-deep-teal rounded-full flex items-center justify-center mr-4">
+                                    <i class="fas fa-balance-scale text-white"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-elegant font-bold text-deep-teal">Law of Similars</h4>
+                                    <p class="text-sm text-earth-brown">Like Cures Like Principle</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center bg-white/80 rounded-xl p-4 backdrop-blur-sm">
+                                <div class="w-10 h-10 bg-homeo-silver rounded-full flex items-center justify-center mr-4">
+                                    <i class="fas fa-vial text-white"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-elegant font-bold text-deep-teal">Potentization</h4>
+                                    <p class="text-sm text-earth-brown">Dynamized Remedies</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center bg-white/80 rounded-xl p-4 backdrop-blur-sm">
+                                <div class="w-10 h-10 bg-soft-purple rounded-full flex items-center justify-center mr-4">
+                                    <i class="fas fa-user-md text-white"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-elegant font-bold text-deep-teal">Constitutional</h4>
+                                    <p class="text-sm text-earth-brown">Individual Treatment</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <button class="w-full bg-gradient-to-r from-deep-teal to-homeo-silver text-white py-4 rounded-xl font-elegant font-bold text-lg hover:shadow-2xl hover:shadow-deep-teal/50 transition-all duration-300 group-hover:scale-105">
+                            💧 Homeopathic Consultation
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Integrated Chat Experience -->
+    <section class="py-20 px-6 bg-gradient-to-r from-ayur-saffron/8 via-golden-yellow/8 to-deep-teal/8">
+        <div class="container mx-auto">
+            <div class="text-center mb-12">
+                <h2 class="text-4xl font-bold mb-4">
+                    <span class="font-sanskrit text-ayur-saffron">त्रिदोष</span>
+                    <span class="font-chinese text-tcm-red mx-4">三寶</span>
+                    <span class="font-elegant text-deep-teal">Unified Consultation</span>
+                </h2>
+                <p class="text-xl text-earth-brown font-elegant">Experience holistic guidance integrating all three healing traditions</p>
+            </div>
+            
+            <!-- Chat Interface with Traditional Styling -->
+            <div class="max-w-4xl mx-auto bg-white/90 backdrop-blur-md rounded-3xl shadow-2xl border-2 traditional-border overflow-hidden">
+                <!-- Chat Header -->
+                <div class="bg-gradient-to-r from-ayur-saffron via-golden-yellow to-deep-teal p-6">
+                    <div class="flex items-center justify-center">
+                        <div class="flex items-center space-x-4">
+                            <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center">
+                                <i class="fas fa-om text-ayur-saffron"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-bold text-white">त्रिगुण AI Advisor</h3>
+                                <p class="text-white/80 text-sm">Ayurveda • TCM • Homeopathy Integrated</p>
+                            </div>
+                            <div class="flex space-x-1">
+                                <div class="w-3 h-3 bg-ayur-green rounded-full animate-pulse"></div>
+                                <div class="w-3 h-3 bg-tcm-red rounded-full animate-pulse" style="animation-delay: 0.5s;"></div>
+                                <div class="w-3 h-3 bg-homeo-blue rounded-full animate-pulse" style="animation-delay: 1s;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Chat Messages -->
+                <div class="p-6 h-96 overflow-y-auto space-y-6" id="traditionalChat">
+                    <!-- Welcome Message -->
+                    <div class="flex items-start space-x-4">
+                        <div class="w-12 h-12 bg-gradient-to-br from-ayur-saffron to-tcm-gold rounded-full flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-lotus text-white"></i>
+                        </div>
+                        <div class="bg-gradient-to-br from-ayur-saffron/10 to-tcm-gold/10 rounded-2xl rounded-tl-sm p-4 max-w-md border border-ayur-saffron/20">
+                            <p class="text-earth-brown mb-2">🙏 <span class="font-sanskrit">नमस्ते</span>! I'm your integrated wellness advisor, combining the wisdom of:</p>
+                            <div class="space-y-1 text-sm">
+                                <p><span class="font-sanskrit text-ayur-saffron">• आयुर्वेद</span> - for constitutional balance</p>
+                                <p><span class="font-chinese text-tcm-red">• 中醫學</span> - for energy harmony</p>
+                                <p><span class="font-elegant text-homeo-blue">• Homœopathy</span> - for gentle healing</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Therapy Selection -->
+                    <div class="flex flex-wrap gap-3 justify-center">
+                        <button class="traditional-suggestion bg-gradient-to-r from-ayur-saffron to-ayur-green text-white px-6 py-2 rounded-full font-sanskrit text-sm hover:shadow-lg transition-all">
+                            🔥 वात विकार (Vata Disorders)
+                        </button>
+                        <button class="traditional-suggestion bg-gradient-to-r from-tcm-red to-tcm-gold text-white px-6 py-2 rounded-full font-chinese text-sm hover:shadow-lg transition-all">
+                            ☯️ 氣虛症狀 (Qi Deficiency)
+                        </button>
+                        <button class="traditional-suggestion bg-gradient-to-r from-homeo-blue to-homeo-silver text-white px-6 py-2 rounded-full font-elegant text-sm hover:shadow-lg transition-all">
+                            💧 Constitutional Remedy
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Chat Input -->
+                <div class="p-6 border-t border-gray-200">
+                    <div class="flex items-center space-x-4">
+                        <button class="text-ayur-saffron hover:text-ayur-green transition-colors p-2">
+                            <i class="fas fa-paperclip text-xl"></i>
+                        </button>
+                        <div class="flex-1 relative">
+                            <input id="traditionalInput" type="text" placeholder="Describe your symptoms in any language..." 
+                                   class="w-full bg-gradient-to-r from-ayur-saffron/5 to-deep-teal/5 rounded-full px-6 py-4 text-earth-brown placeholder-earth-brown/60 focus:outline-none focus:ring-2 focus:ring-ayur-saffron border-2 border-ayur-saffron/20">
+                        </div>
+                        <button id="traditionalSend" class="bg-gradient-to-r from-ayur-saffron via-golden-yellow to-deep-teal text-white p-4 rounded-full hover:shadow-xl transition-all duration-300 hover:scale-105">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                    
+                    <!-- Cultural Features -->
+                    <div class="flex justify-center mt-4 space-x-8 text-sm text-earth-brown/70">
+                        <span><i class="fas fa-language mr-1 text-ayur-saffron"></i>Multi-lingual Support</span>
+                        <span><i class="fas fa-certificate mr-1 text-tcm-red"></i>Authentic Traditions</span>
+                        <span><i class="fas fa-leaf mr-1 text-deep-teal"></i>Natural Healing</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Traditional Footer -->
+    <footer class="bg-gradient-to-br from-earth-brown via-tcm-black to-earth-brown text-white py-16 px-6 relative overflow-hidden">
+        <!-- Traditional Decorative Background -->
+        <div class="absolute inset-0 opacity-10">
+            <div class="absolute top-0 left-0 w-full h-full bg-ayur-pattern"></div>
+            <div class="absolute bottom-0 right-0 w-1/2 h-full bg-bamboo-pattern"></div>
+        </div>
+        
+        <div class="container mx-auto relative z-10">
+            <div class="grid md:grid-cols-4 gap-12">
+                <!-- Sacred Logo -->
+                <div class="text-center md:text-left">
+                    <div class="flex items-center justify-center md:justify-start space-x-3 mb-6">
+                        <div class="w-16 h-16 bg-gradient-to-br from-warm-cream to-ayur-saffron rounded-full flex items-center justify-center border-4 border-golden-yellow">
+                            <div class="w-10 h-10 bg-gradient-to-br from-ayur-green to-sage-green rounded-full flex items-center justify-center">
+                                <i class="fas fa-om text-white"></i>
+                            </div>
+                        </div>
+                        <div>
+                            <h5 class="text-2xl font-sanskrit font-bold">आयुCheck.in</h5>
+                            <p class="text-sm font-elegant opacity-80">Ancient • Wisdom • Modern • AI</p>
+                        </div>
+                    </div>
+                    <p class="text-sm opacity-80 font-elegant mb-6">
+                        "सर्वे भवन्तु सुखिनः" - May all beings be happy and healthy through the sacred traditions of natural healing.
+                    </p>
+                    <div class="flex justify-center md:justify-start space-x-4">
+                        <a href="#" class="w-10 h-10 bg-ayur-saffron rounded-full flex items-center justify-center hover:bg-ayur-green transition-colors">
+                            <i class="fab fa-facebook text-white"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 bg-golden-yellow rounded-full flex items-center justify-center hover:bg-tcm-gold transition-colors">
+                            <i class="fab fa-twitter text-white"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 bg-deep-teal rounded-full flex items-center justify-center hover:bg-homeo-silver transition-colors">
+                            <i class="fab fa-instagram text-white"></i>
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Traditional Links -->
+                <div>
+                    <h6 class="text-lg font-bold mb-4 font-sanskrit text-ayur-saffron">परंपरा (Traditions)</h6>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="opacity-80 hover:opacity-100 hover:text-ayur-saffron transition-all font-elegant">आयुर्वेद शास्त्र</a></li>
+                        <li><a href="#" class="opacity-80 hover:opacity-100 hover:text-tcm-gold transition-all font-chinese">中醫經典</a></li>
+                        <li><a href="#" class="opacity-80 hover:opacity-100 hover:text-homeo-blue transition-all font-elegant">Homeopathic Materia Medica</a></li>
+                        <li><a href="#" class="opacity-80 hover:opacity-100 hover:text-sage-green transition-all font-elegant">Integrated Wellness</a></li>
+                    </ul>
+                </div>
+                
+                <!-- Sacred Services -->
+                <div>
+                    <h6 class="text-lg font-bold mb-4 font-chinese text-golden-yellow">服務 (Services)</h6>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="opacity-80 hover:opacity-100 hover:text-ayur-saffron transition-all">🔥 Dosha Analysis</a></li>
+                        <li><a href="#" class="opacity-80 hover:opacity-100 hover:text-golden-yellow transition-all">☯️ Qi Assessment</a></li>
+                        <li><a href="#" class="opacity-80 hover:opacity-100 hover:text-deep-teal transition-all">💧 Remedy Selection</a></li>
+                        <li><a href="#" class="opacity-80 hover:opacity-100 hover:text-sage-green transition-all">🌿 Lifestyle Guidance</a></li>
+                    </ul>
+                </div>
+                
+                <!-- Sacred Contact -->
+                <div>
+                    <h6 class="text-lg font-bold mb-4 font-elegant text-deep-teal">Sacred Contact</h6>
+                    <div class="space-y-3">
+                        <div class="flex items-center">
+                            <i class="fas fa-envelope text-ayur-saffron mr-3"></i>
+                            <a href="mailto:namaste@ayucheck.in" class="opacity-80 hover:opacity-100 text-sm">namaste@ayucheck.in</a>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-om text-golden-yellow mr-3"></i>
+                            <span class="opacity-80 text-sm">24/7 Divine AI Guidance</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-globe text-deep-teal mr-3"></i>
+                            <span class="opacity-80 text-sm">Global Healing Community</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Sacred Disclaimer -->
+            <div class="border-t border-white/20 mt-12 pt-8 text-center">
+                <p class="text-sm opacity-80 mb-4 font-elegant">
+                    © 2025 आयुCheck.in • All Sacred Rights Reserved • 
+                    <a href="#" class="hover:text-ayur-saffron transition-colors">Privacy</a> • 
+                    <a href="#" class="hover:text-tcm-gold transition-colors">Terms</a> • 
+                    <a href="#" class="hover:text-homeo-blue transition-colors">Healing Ethics</a>
+                </p>
+                <p class="text-xs opacity-60 font-elegant max-w-4xl mx-auto leading-relaxed">
+                    <strong>Sacred Disclaimer:</strong> This platform honors ancient healing traditions for educational purposes. 
+                    The wisdom shared here comes from millennia of traditional practice combined with modern AI technology. 
+                    Always seek guidance from qualified practitioners and healthcare professionals. May this knowledge serve the highest good of all beings.
+                    <br><span class="font-sanskrit">ॐ शान्ति शान्ति शान्ति:</span>
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Traditional JavaScript -->
+    <script>
+        // Scroll-triggered animations
+        const observerOptions = {
+            threshold: 0.2,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.scroll-fade').forEach(el => {
+            observer.observe(el);
+        });
+
+        // Traditional Chat Functionality
+        const traditionalSuggestions = document.querySelectorAll('.traditional-suggestion');
+        const traditionalInput = document.getElementById('traditionalInput');
+        const traditionalSend = document.getElementById('traditionalSend');
+        const traditionalChat = document.getElementById('traditionalChat');
+
+        traditionalSuggestions.forEach(button => {
+            button.addEventListener('click', function() {
+                const message = this.textContent.trim();
+                addTraditionalMessage(message, 'user');
+                
+                setTimeout(() => {
+                    let response = '';
+                    if (message.includes('वात') || message.includes('Vata')) {
+                        response = `🔥 <strong class="font-sanskrit text-ayur-saffron">वात दोष</strong> imbalance detected. According to Ayurveda:<br>
+                        • Practice <span class="font-sanskrit">प्राणायाम</span> (Pranayama)<br>
+                        • Take <span class="font-sanskrit">अश्वगंधा</span> (Ashwagandha)<br>
+                        • Follow regular routine<br><br>
+                        <span class="text-sm opacity-80">🙏 Would you like TCM or Homeopathic perspectives too?</span>`;
+                    } else if (message.includes('氣') || message.includes('Qi')) {
+                        response = `☯️ <strong class="font-chinese text-tcm-red">氣虛</strong> (Qi Deficiency) analysis from TCM:<br>
+                        • Strengthen <span class="font-chinese">脾胃</span> (Spleen & Stomach)<br>
+                        • Use <span class="font-chinese">人參</span> (Ginseng) formula<br>
+                        • Practice <span class="font-chinese">氣功</span> (Qigong)<br><br>
+                        <span class="text-sm opacity-80">🐉 Shall I integrate Ayurvedic dosha assessment?</span>`;
+                    } else if (message.includes('Constitutional')) {
+                        response = `💧 <strong class="font-elegant text-homeo-blue">Constitutional Analysis</strong> in Homeopathy:<br>
+                        • Individual symptom totality<br>
+                        • Miasmatic consideration<br>
+                        • Potency selection based on sensitivity<br><br>
+                        <span class="text-sm opacity-80">⚗️ Would you like to explore your Ayurvedic constitution too?</span>`;
+                    }
+                    addTraditionalMessage(response, 'bot');
+                }, 1500);
+            });
+        });
+
+        function addTraditionalMessage(text, sender) {
+            const messageDiv = document.createElement('div');
+            
+            if (sender === 'user') {
+                messageDiv.innerHTML = `
+                    <div class="flex justify-end mb-4">
+                        <div class="bg-gradient-to-r from-ayur-saffron via-tcm-gold to-homeo-blue text-white rounded-2xl rounded-tr-sm p-4 max-w-md shadow-lg">
+                            <p class="text-sm">${text}</p>
+                        </div>
+                    </div>
+                `;
+            } else {
+                messageDiv.innerHTML = `
+                    <div class="flex items-start space-x-4 mb-6">
+                        <div class="w-12 h-12 bg-gradient-to-br from-sage-green to-lotus-pink rounded-full flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-leaf text-white"></i>
+                        </div>
+                        <div class="bg-gradient-to-br from-ayur-saffron/10 via-tcm-gold/10 to-homeo-blue/10 rounded-2xl rounded-tl-sm p-4 max-w-md border border-sage-green/20">
+                            <p class="text-earth-brown text-sm">${text}</p>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            traditionalChat.appendChild(messageDiv);
+            traditionalChat.scrollTop = traditionalChat.scrollHeight;
+        }
+
+        // Send message functionality
+        function sendTraditionalMessage() {
+            const message = traditionalInput.value.trim();
+            if (!message) return;
+            
+            addTraditionalMessage(message, 'user');
+            traditionalInput.value = '';
+            
+            setTimeout(() => {
+                const responses = [
+                    `🙏 From an integrated perspective combining all three traditions, I recommend a holistic approach...`,
+                    `🌟 <span class="font-sanskrit">आयुर्वेद</span> suggests balance, <span class="font-chinese">中醫</span> recommends harmony, and <span class="font-elegant">Homœopathy</span> offers individualization...`,
+                    `🕉️ Let me analyze this through the lens of <span class="font-sanskrit">पंचमहाभूत</span>, <span class="font-chinese">五行理論</span>, and constitutional remedies...`
+                ];
+                const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+                addTraditionalMessage(randomResponse, 'bot');
+            }, 2000);
+        }
+
+        traditionalSend.addEventListener('click', sendTraditionalMessage);
+        traditionalInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendTraditionalMessage();
+            }
+        });
+
+        // Smooth scrolling for traditional navigation
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Traditional blessing on load
+        window.addEventListener('load', function() {
+            setTimeout(() => {
+                console.log('🙏 सर्वे भवन्तु सुखिनः सर्वे सन्तु निरामयाः');
+                console.log('☯️ 願所有眾生安樂，願所有眾生無病');  
+                console.log('💧 "Similia Similibus Curentur" - Like Cures Like');
+                console.log('🌿 Welcome to the Sacred Traditions of Healing');
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
