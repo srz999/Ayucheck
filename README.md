@@ -102,14 +102,6 @@ You can try the following example queries in the Ayurvedic RAG Chat:
 🌿 "Traditional treatment for digestive disorders"
 ```
 
-## Acknowledgments
-
-Ayucheck is built upon the foundations of excellent tutorials and documentation:
-
-- 📚 [Dave Gray's Courses](https://courses.davegray.codes/)  
-- ✅ [YouTube Channel](https://www.youtube.com/DaveGrayTeachesCode)  
-- 📺 [Original RAG Tutorial](https://youtu.be/YLagvzoWCL0)
-
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
