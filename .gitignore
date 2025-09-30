@@ -52,8 +52,11 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
+# Python lib directory (not Next.js src/lib)
+/lib/
 lib64/
+# Allow Next.js src/lib directory
+!src/lib/
 parts/
 sdist/
 var/
