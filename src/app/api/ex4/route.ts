@@ -81,14 +81,14 @@ export async function POST(req: Request) {
 
         const chain = RunnableSequence.from([
             {
-                question: (input) => input.question,
-                chat_history: (input) => input.chat_history,
+                question: (input: any) => input.question,
+                chat_history: (input: any) => input.chat_history,
                 context: () => formatDocumentsAsString(docs),
             },
             prompt,
             model,
             parser,
-        ]);
+        ] as any);
 
         // Convert the response into a friendly text-stream
         const stream = await chain.stream({

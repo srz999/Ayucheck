@@ -214,7 +214,7 @@ export async function POST(req: NextRequest) {
       verbose: true,
     });
 
-    // Create the RAG chain using RunnableSequence
+    // Create the RAG chain using RunnableSequence with type assertion for compatibility
     const ragChain = RunnableSequence.from([
       {
         context: () => formatDocumentsAsString(filteredDocs),
@@ -223,7 +223,7 @@ export async function POST(req: NextRequest) {
       ragPromptTemplate,
       chatModel,
       new HttpResponseOutputParser(),
-    ]);
+    ] as any);
 
     // Execute the chain and stream the response
     const stream = await ragChain.stream({

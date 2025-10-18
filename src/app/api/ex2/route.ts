@@ -50,7 +50,7 @@ export async function POST(req: Request) {
        */
         const parser = new HttpResponseOutputParser();
 
-        const chain = prompt.pipe(model.bind({ stop: ["?"] })).pipe(parser);
+        const chain = prompt.pipe(model.bind({ stop: ["?"] }) as any).pipe(parser as any);
 
         // Convert the response into a friendly text-stream
         const stream = await chain.stream({

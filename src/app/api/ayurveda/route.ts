@@ -216,28 +216,22 @@ Instructions for your response:
 
 Please provide a detailed, helpful response about the Ayurvedic topic:`);
 
-    // Create the processing chain
-    const dumy = RunnableSequence.from([
+    // Create the processing chain - using type assertion to bypass TypeScript issues with older LangChain versions
+    const chain = RunnableSequence.from([
       {
-      // Input: { question: string }
-      // Output: { question: string, chat_history: string, context: string }
-      question: (input: { question: string }) => input.question,
-      chat_history: () => formattedPreviousMessages,
-      context: () => context,
+        // Input: { question: string }
+        // Output: { question: string, chat_history: string, context: string }
+        question: (input: { question: string }) => input.question,
+        chat_history: () => formattedPreviousMessages,
+        context: () => context,
       },
-      // Input: { question: string, chat_history: string, context: string }
-      // Output: ChatPromptValue (formatted prompt with variables replaced)
       prompt,
-      // Input: ChatPromptValue
-      // Output: AIMessageChunk stream (streaming LLM response)
       model,
-      // Input: AIMessageChunk stream
-      // Output: string stream (HTTP-formatted text chunks for streaming response)
       new HttpResponseOutputParser(),
-    ]);
+    ] as any);
 
     // Execute the chain
-    const stream = await dumy.stream({
+    const stream = await chain.stream({
       question,
     });
 

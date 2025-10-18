@@ -442,7 +442,7 @@ Please provide a detailed, helpful response about the Ayurvedic topic:`);
       prompt,
       this.llm,
       new HttpResponseOutputParser(),
-    ]);
+    ] as any);
   }
 }
 
