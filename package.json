@@ -1,5 +1,5 @@
 {
-  "name": "ayucheck",
+  "name": "next-ai-prep",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -9,11 +9,14 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@langchain/community": "^0.3.57",
     "@langchain/openai": "^0.0.28",
+    "@qdrant/js-client-rest": "^1.15.1",
     "@radix-ui/react-slot": "^1.0.2",
     "ai": "^3.0.23",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
+    "dotenv": "^16.4.5",
     "langchain": "^0.1.36",
     "lucide-react": "^0.370.0",
     "next": "14.2.1",
@@ -21,12 +24,14 @@
     "react": "^18",
     "react-dom": "^18",
     "tailwind-merge": "^2.2.2",
-    "tailwindcss-animate": "^1.0.7"
+    "tailwindcss-animate": "^1.0.7",
+    "uuid": "^13.0.0"
   },
   "devDependencies": {
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
+    "@types/uuid": "^10.0.0",
     "eslint": "^8",
     "eslint-config-next": "14.2.1",
     "postcss": "^8",

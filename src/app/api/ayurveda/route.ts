@@ -22,7 +22,7 @@ interface RAGChunk {
 }
 
 interface RAGData {
-  source: string;
+  source: string; 
   title: string;
   total_pages: number;
   total_chunks: number;
@@ -50,6 +50,7 @@ class AyurvedicRAGLoader {
     const queryLower = query.toLowerCase();
     const relevantChunks: { chunk: RAGChunk; score: number }[] = [];
 
+    console.log("======="+query);
     // Search through all chunks
     for (const pageKey in this.data.pages) {
       const page = this.data.pages[pageKey];
@@ -160,8 +161,10 @@ export async function POST(req: NextRequest) {
     // Initialize RAG loader
     const rag = initializeRAGLoader();
     
+    //console.log(await req.json())
     const { messages } = await req.json();
 
+    
     if (!messages || messages.length === 0) {
       return NextResponse.json({ error: 'No messages provided' }, { status: 400 });
     }
@@ -214,19 +217,27 @@ Instructions for your response:
 Please provide a detailed, helpful response about the Ayurvedic topic:`);
 
     // Create the processing chain
-    const chain = RunnableSequence.from([
+    const dumy = RunnableSequence.from([
       {
-        question: (input: { question: string }) => input.question,
-        chat_history: () => formattedPreviousMessages,
-        context: () => context,
+      // Input: { question: string }
+      // Output: { question: string, chat_history: string, context: string }
+      question: (input: { question: string }) => input.question,
+      chat_history: () => formattedPreviousMessages,
+      context: () => context,
       },
+      // Input: { question: string, chat_history: string, context: string }
+      // Output: ChatPromptValue (formatted prompt with variables replaced)
       prompt,
+      // Input: ChatPromptValue
+      // Output: AIMessageChunk stream (streaming LLM response)
       model,
+      // Input: AIMessageChunk stream
+      // Output: string stream (HTTP-formatted text chunks for streaming response)
       new HttpResponseOutputParser(),
     ]);
 
     // Execute the chain
-    const stream = await chain.stream({
+    const stream = await dumy.stream({
       question,
     });
 

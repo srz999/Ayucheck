@@ -1,0 +1,19 @@
+{
+  "name": "openai-embedding-examples",
+  "version": "1.0.0",
+  "description": "Learning examples for OpenAI embeddings",
+  "type": "module",
+  "scripts": {
+    "test-js": "node test-embedding.js",
+    "test-ts": "npx tsx test-embedding.ts",
+    "install-deps": "npm install dotenv @types/node tsx"
+  },
+  "dependencies": {
+    "openai": "^4.0.0"
+  },
+  "devDependencies": {
+    "dotenv": "^16.0.0",
+    "@types/node": "^20.0.0",
+    "tsx": "^4.0.0"
+  }
+}

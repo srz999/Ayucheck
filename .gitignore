@@ -52,11 +52,8 @@ dist/
 downloads/
 eggs/
 .eggs/
-# Python lib directory (not Next.js src/lib)
-/lib/
+lib/
 lib64/
-# Allow Next.js src/lib directory
-!src/lib/
 parts/
 sdist/
 var/
@@ -64,6 +61,12 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
+
+# Exclude Next.js src and lib directories from being ignored
+!src/
+!src/**
+!lib/
+!lib/**
 
 # Jupyter Notebooks
 .ipynb_checkpoints
@@ -106,3 +109,4 @@ logs/
 Network Trash Folder
 Temporary Items
 .apdisk
+qdrant_storage/

@@ -1,87 +1,115 @@
-# RAG Chat Application with LangChain & Next.js
+# Advanced RAG Application with MinerU + LangChain + Next.js
 
 ## Architecture Overview
 
-This is a tutorial-based RAG (Retrieval Augmented Generation) application demonstrating progressive complexity from basic chat to context-aware AI responses. The app follows a learning progression with 4 example implementations:
+Production-ready RAG system for Ayurvedic medicine knowledge base, evolved from Dave Gray's tutorial. Features advanced PDF processing with MinerU and multiple implementation patterns:
 
 - **`api/chat`**: Basic OpenAI integration using Vercel AI SDK
-- **`api/ex1`**: LangChain basic prompting with streaming
-- **`api/ex2-ex3`**: LangChain with conversation memory and personality prompts
-- **`api/ex4`**: Full RAG implementation with JSON document loading
+- **`api/ex1-ex4`**: Progressive LangChain examples (basic → memory → full RAG)
+- **`api/ayurveda`**: Production RAG with MinerU-processed Ayurvedic data
+- **`api/embedyurveda`**: Vector store RAG with Chroma/MemoryVectorStore
+- **`scripts/`**: MinerU PDF processing pipeline for data generation
 
-## Key Components & Patterns
+## Key Components & Data Pipeline
 
-### RAG Implementation (`api/ex4/route.ts`)
-The main RAG endpoint loads US states data from `src/data/states.json` using LangChain's `JSONLoader`:
+### MinerU Document Processing (`scripts/pdf_to_json_mineru_enhanced.py`)
+Advanced PDF parsing pipeline that creates structured RAG data:
+```python
+# Creates ayurcheck_rag.json with 220+ text chunks from 241-page PDF
+# Preserves document structure: sections, tables, formulas, images
+```
+
+### Production RAG Implementation (`api/ayurveda/route.ts`)
+Loads pre-processed Ayurvedic data with structured metadata:
 ```typescript
-const loader = new JSONLoader("src/data/states.json", ["/state", "/code", "/nickname", ...]);
+interface RAGChunk {
+  id: string; text: string; type: string;
+  section?: string; subsection?: string; 
+  bbox?: number[]; page?: number;
+}
 ```
 
-**Critical Pattern**: Documents are loaded once per request and formatted as context using `formatDocumentsAsString(docs)`. The RAG chain structure:
-```
-Input → Context Injection → Prompt Template → ChatOpenAI → HttpResponseOutputParser → Stream
-```
-
-### Streaming Architecture
-All API routes use streaming responses via `StreamingTextResponse` and `createStreamDataTransformer()`. The client-side chat uses Vercel's `useChat` hook with automatic stream handling.
-
-### LangChain Chain Patterns
-The codebase demonstrates `RunnableSequence.from()` pattern for building processing chains:
+### Vector Store Integration (`api/embedyurveda/route.ts` + `lib/vector-store.ts`)
+Supports both Chroma and in-memory vector stores with Ayurveda-specific metadata:
 ```typescript
-const chain = RunnableSequence.from([
-  { question: (input) => input.question, context: () => formatDocumentsAsString(docs) },
-  prompt, model, parser
-]);
+interface AyurvedaMetadata {
+  herb_name?: string; botanical_name?: string;
+  dosha_type?: "vata" | "pitta" | "kapha" | "tridosha";
+  category: "remedy" | "herb" | "lifestyle" | "diagnosis" | "pharmacopoeia";
+}
 ```
 
-## Development Workflows
+## Critical Development Workflows
 
-### Environment Setup
-- Requires `.env.local` with `OPENAI_API_KEY`
-- Standard Next.js commands: `npm install`, `npm run dev`
-- Edge runtime enabled for main page (`export const runtime = 'edge'`)
+### MinerU PDF Processing Pipeline
+Generate new RAG data from PDFs using the enhanced MinerU pipeline:
+```bash
+# Activate MinerU environment and process PDFs
+cd scripts
+./activate_mineru.sh  # Sets up Python 3.9 venv with MinerU 2.5.4
+python pdf_to_json_mineru_enhanced.py input.pdf output.json
+python mineru_to_rag.py output.json  # Creates RAG-ready files
+```
 
-### Testing Different Chat Modes
-Change the API endpoint in `src/app/components/chat.tsx`:
+### Environment Setup & Testing
+```bash
+# Required environment
+echo "OPENAI_API_KEY=your_key" >> .env.local
+
+# Test different RAG implementations
+npm run dev
+# Visit /ayurveda for production RAG or switch useChat api in chat.tsx
+```
+
+### Vector Store Configuration
+Toggle between Chroma (persistent) and MemoryVectorStore via `lib/vector-store.ts`:
 ```typescript
-const { messages, input, handleInputChange, handleSubmit } = useChat({
-    api: 'api/ex4', // Change this to test different examples
-});
+const config = { 
+  useVectorDB: true,           // Enable vector similarity search
+  vectorDBType: 'chroma'       // or 'memory' for in-process
+};
 ```
 
-## UI Architecture
+## Data Architecture & Formats
 
-### Component Structure
-- Single-page app with `src/app/page.tsx` rendering `<Chat />` component
-- Uses shadcn/ui components (`Button`, `Input`) with Tailwind CSS
-- Chat UI implements auto-scrolling with `useRef` and `useEffect`
+### Multi-Format Data Pipeline 
+All data exists in 3 formats (see `src/data/` and `INTEGRATION_GUIDE.md`):
+- **`.json`**: Structured data for Next.js API routes
+- **`.jsonl`**: Line-delimited for vector database ingestion  
+- **`.md`**: Human-readable documentation format
 
-### Styling Conventions
-- Uses CSS custom properties for theming (see `tailwind.config.ts`)
-- Responsive design with `max-w-3xl mx-auto` container pattern
-- Message styling differentiates user (left-aligned) vs assistant (right-aligned, 3/4 width)
-
-## Data & Context Management
-
-### JSON Document Structure
-The `states.json` contains structured US state data. LangChain's `JSONLoader` extracts specific fields via JSONPath selectors, making it context-aware for state-related queries.
-
-### Memory Management
-Conversation memory is handled via `formatMessage()` function that concatenates previous messages:
+### Ayurvedic Knowledge Structure
+MinerU preserves semantic document structure:
 ```typescript
-const formattedPreviousMessages = messages.slice(0, -1).map(formatMessage);
+// 220 text chunks from 241-page Ayurvedic Pharmacopoeia
+// Content types: text (212), tables (2), formulas (6), images (9)
+// Avg chunk size: 1,128 characters with source attribution
 ```
 
-## Common Patterns to Follow
+## Critical Implementation Patterns
 
 1. **All API routes must export `dynamic = 'force-dynamic'`** for proper streaming
-2. **Error handling pattern**: Return `Response.json({ error: e.message }, { status: e.status ?? 500 })`
-3. **LangChain model configuration**: Always set `streaming: true` for chat models
-4. **Prompt templates**: Use context injection pattern with named variables like `{context}`, `{chat_history}`, `{question}`
+2. **Runtime selection**: Use `export const runtime = 'edge'` for pages, Node.js for API routes requiring `fs`
+3. **Error handling**: Return `Response.json({ error: e.message }, { status: e.status ?? 500 })`
+4. **LangChain chains**: Always use `streaming: true` and `RunnableSequence.from()` pattern
+5. **Vector search**: Use `similaritySearchWithScore()` with relevance thresholds (0.7+ typical)
+
+## Production Considerations
+
+### MinerU Processing Requirements
+- **Python 3.9 virtual environment** (`scripts/mineru_venv/`)
+- **~4GB disk space** for model downloads (layoutlmv3, unimernet, rapidtable)
+- **Processing time**: ~25 minutes for 241-page PDF (includes first-time setup)
+
+### API Route Performance
+- **ayurveda/**: In-memory JSON loading, fast startup, 220 chunks searched
+- **embedyurveda/**: Vector similarity search, slower first request, semantic retrieval
+- Use HTTP request interceptors in `embedyurveda/route.ts` for OpenAI API monitoring
 
 ## Integration Points
 
-- **Vercel AI SDK**: Handles streaming and chat state management
-- **LangChain**: Document loading, text splitting, and chain orchestration  
-- **OpenAI**: GPT-3.5-turbo for language model inference
-- **shadcn/ui**: Pre-built accessible components with Tailwind integration
+- **Vercel AI SDK**: Streaming responses and chat state management
+- **LangChain**: Document processing, vector stores, and RAG orchestration
+- **MinerU**: Advanced PDF parsing with structure preservation (tables, formulas)  
+- **Chroma/MemoryVectorStore**: Vector similarity search with metadata filtering
+- **shadcn/ui**: Accessible components with Tailwind CSS integration
