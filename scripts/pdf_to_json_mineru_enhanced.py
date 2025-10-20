@@ -10,47 +10,53 @@ import sys
 import subprocess
 import tempfile
 import shutil
+import platform
 from pathlib import Path
 from typing import Dict, Any, List, Optional
 import argparse
 
-# MinerU configuration template
-MINERU_CONFIG_TEMPLATE = {
-    "layout": {
-        "model": "layoutlmv3"
-    },
-    "formula": {
-        "enable": True,
-        "model": "unimernet"
-    },
-    "table": {
-        "enable": True,
-        "model": "rapidtable"
-    },
-    "ocr": {
-        "enable": True,
-        "model": "paddleocr"
-    }
-}
+# MinerU configuration paths
+# Primary config location (where mineru-models-download stores config)
+MINERU_CONFIG_PATH = Path(r"C:\Users\vinit\mineru.json")
+# Fallback config directory
+MINERU_CONFIG_DIR = Path.home() / ".config" / "mineru"
 
 def setup_mineru_config():
-    """Setup MinerU configuration file"""
+    r"""
+    Setup MinerU configuration file
+    Uses the config created by mineru-models-download at C:\Users\vinit\mineru.json
+    """
     try:
-        # Create config directory
-        config_dir = Path.home() / ".config" / "mineru"
-        config_dir.mkdir(parents=True, exist_ok=True)
-        
-        config_file = config_dir / "mineru.json"
-        
-        # Only create config if it doesn't exist
-        if not config_file.exists():
-            with open(config_file, 'w') as f:
-                json.dump(MINERU_CONFIG_TEMPLATE, f, indent=2)
-            print(f"Created MinerU config at: {config_file}")
-        else:
-            print(f"MinerU config already exists at: {config_file}")
+        # Check if the primary config exists (created by mineru-models-download)
+        if MINERU_CONFIG_PATH.exists():
+            print(f"✅ MinerU config found at: {MINERU_CONFIG_PATH}")
+            print(f"   Models downloaded via mineru-models-download are ready to use")
             
-        return True
+            # Verify config has model paths
+            with open(MINERU_CONFIG_PATH, 'r', encoding='utf-8') as f:
+                config_data = json.load(f)
+                if "models-dir" in config_data:
+                    print(f"   Pipeline models: {config_data['models-dir'].get('pipeline', 'Not set')}")
+                    print(f"   VLM models: {config_data['models-dir'].get('vlm', 'Not set')}")
+                else:
+                    print("   ⚠️  Warning: 'models-dir' not found in config")
+            
+            return True
+        else:
+            print(f"⚠️  MinerU config not found at: {MINERU_CONFIG_PATH}")
+            print(f"   Please run 'mineru-models-download' first to download models")
+            print(f"   This will create the config file with proper model paths")
+            
+            # Create fallback config directory if needed
+            MINERU_CONFIG_DIR.mkdir(parents=True, exist_ok=True)
+            fallback_config = MINERU_CONFIG_DIR / "mineru.json"
+            
+            if not fallback_config.exists():
+                print(f"   Creating fallback config at: {fallback_config}")
+                print(f"   Note: You should still run mineru-models-download for better performance")
+            
+            return False
+            
     except Exception as e:
         print(f"Warning: Could not setup MinerU config: {e}")
         return False
@@ -110,43 +116,89 @@ def run_mineru_conversion(pdf_path: str, output_dir: str, config: Dict[str, Any]
         # Create output directory if it doesn't exist
         os.makedirs(output_dir, exist_ok=True)
         
-        # Build MinerU command
-        cmd = ["mineru", "-p", pdf_path, "-o", output_dir]
+        # Build MinerU command with all logging and verbosity options
+        # For Windows PowerShell: Set multiple environment variables
+        # For bash/sh: Set multiple environment variables
+        if platform.system() == "Windows":
+            env_vars = [
+                "$env:MINERU_LOG_LEVEL='DEBUG'",
+                "$env:MINERU_DEBUG='true'",
+                "$env:ORT_LOG_LEVEL='0'",  # ONNX Runtime log level (0=Verbose, 1=Info, 2=Warning, 3=Error, 4=Fatal)
+                "$env:ORT_LOG_VERBOSITY='1'",  # ONNX Runtime verbosity level
+            ]
+            cmd = ["powershell", "-Command", 
+                   "; ".join(env_vars) + f"; mineru -p '{pdf_path}' -o '{output_dir}'"]
+        else:
+            env_vars = [
+                "MINERU_LOG_LEVEL=DEBUG",
+                "ORT_LOG_LEVEL=0",  # ONNX Runtime log level (0=Verbose, 1=Info, 2=Warning, 3=Error, 4=Fatal)
+                "ORT_LOG_VERBOSITY=1",  # ONNX Runtime verbosity level
+            ]
+            cmd = ["sh", "-c", 
+                   " ".join(env_vars) + f" mineru -p '{pdf_path}' -o '{output_dir}'"]
+        
+        # Add config file path if it exists
+        if MINERU_CONFIG_PATH.exists():
+            if platform.system() == "Windows":
+                cmd[2] += f" --config '{MINERU_CONFIG_PATH}'"
+            else:
+                cmd[2] += f" --config '{MINERU_CONFIG_PATH}'"
+            print(f"📄 Using config: {MINERU_CONFIG_PATH}")
         
         # Add additional options if specified
         if config:
             if config.get("verbose"):
-                cmd.append("--verbose")
+                cmd[2] += " --verbose"
             if config.get("ocr_only"):
-                cmd.extend(["--mode", "ocr"])
+                cmd[2] += " --mode ocr"
         
-        print(f"Running MinerU command: {' '.join(cmd)}")
-        print("⏳ This may take several minutes, especially on first run (downloading models)...")
+        print(f"🔧 Enabled logging options:")
+        print(f"   MINERU_LOG_LEVEL=DEBUG")
+        print(f"   ORT_LOG_LEVEL=0 (Verbose)")
+        print(f"   ORT_LOG_VERBOSITY=1")
+        print(f"Running MinerU command with maximum verbosity")
+        print("⏳ Processing PDF with downloaded models...")
+        print()  # Empty line for better readability
         
-        # Run with real-time output
-        process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, 
-                                 text=True, universal_newlines=True)
-        
-        # Print real-time output
-        while True:
-            output = process.stdout.readline()
-            if output == '' and process.poll() is not None:
-                break
-            if output:
-                print(f"   {output.strip()}")
-        
-        # Wait for completion
-        return_code = process.poll()
-        
+        # Run with real-time output - combine stdout and stderr
+        # Note: MinerU and ONNX Runtime emit most logs on stderr. We redirect
+        # stderr to stdout so we can capture and stream all MinerU output in
+        # real time. We also accumulate lines in a buffer so that if the
+        # process fails we can print the captured output (process.stderr is
+        # None when redirected to STDOUT, so attempting to read it causes
+        # AttributeErrors).
+        process = subprocess.Popen(
+            cmd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+            bufsize=1,
+        )
+
+        # Capture and stream output lines as they arrive
+        output_lines: List[str] = []
+        if process.stdout is not None:
+            for line in iter(process.stdout.readline, ''):
+                if line:
+                    stripped = line.rstrip()
+                    output_lines.append(stripped)
+                    print(stripped)
+
+        # Wait for completion and evaluate return code
+        process.wait()
+        return_code = process.returncode
+
+        output_text = "\n".join(output_lines)
+
         if return_code == 0:
             print("MinerU conversion completed successfully!")
             return True
         else:
-            # Get error output
-            stderr_output = process.stderr.read()
             print(f"MinerU conversion failed with return code {return_code}")
-            if stderr_output:
-                print(f"Error output: {stderr_output}")
+            if output_text:
+                print("--- MinerU output (last captured) ---")
+                print(output_text)
+                print("--- end MinerU output ---")
             return False
         
     except subprocess.TimeoutExpired:

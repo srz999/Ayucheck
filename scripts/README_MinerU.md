@@ -25,6 +25,8 @@ This directory contains scripts for converting PDF files to JSON format using di
 
 ### Installation
 
+#### Step 1: Install MinerU
+
 The script will automatically install MinerU, but you can also install manually:
 
 ```bash
@@ -34,6 +36,47 @@ pip install -U mineru[core]
 For GPU acceleration (optional):
 ```bash
 pip install -U mineru[full]
+```
+
+#### Step 2: Download Models (REQUIRED)
+
+**IMPORTANT**: Before using MinerU, you must download the required AI models using the official tool:
+
+```bash
+# Download all required models (pipeline + VLM models)
+mineru-models-download
+```
+
+This will:
+- Download PDF-Extract-Kit models (~4GB) for layout analysis, table recognition, and formula detection
+- Download VLM models (~2.4GB) for advanced vision-language processing
+- Create configuration file at `C:\Users\<username>\mineru.json` (Windows) or `~/.mineru.json` (Linux/Mac)
+- Store models in `~/.cache/huggingface/hub/`
+
+**First-time setup takes ~10-15 minutes** depending on your internet connection.
+
+#### Step 3: Verify Installation
+
+Check that the config file was created:
+
+**Windows**:
+```powershell
+cat C:\Users\vinit\mineru.json
+```
+
+**Linux/Mac**:
+```bash
+cat ~/.mineru.json
+```
+
+You should see model paths like:
+```json
+{
+  "models-dir": {
+    "pipeline": "C:\\Users\\vinit\\.cache\\huggingface\\hub\\models--opendatalab--PDF-Extract-Kit-1.0\\...",
+    "vlm": "C:\\Users\\vinit\\.cache\\huggingface\\hub\\models--opendatalab--MinerU2.5-2509-1.2B\\..."
+  }
+}
 ```
 
 ## Usage
@@ -122,27 +165,46 @@ Comparison tool that tests both PyMuPDF and MinerU on the same document.
 
 ## Configuration
 
-MinerU can be configured via `~/.config/mineru/mineru.json`:
+### MinerU Configuration File
+
+After running `mineru-models-download`, the configuration is stored at:
+- **Windows**: `C:\Users\<username>\mineru.json`
+- **Linux/Mac**: `~/.mineru.json`
+
+The `pdf_to_json_mineru_enhanced.py` script automatically uses this configuration file.
+
+### Configuration Structure
 
 ```json
 {
-  "layout": {
-    "model": "layoutlmv3"
+  "models-dir": {
+    "pipeline": "C:\\Users\\vinit\\.cache\\huggingface\\hub\\models--opendatalab--PDF-Extract-Kit-1.0\\snapshots\\...",
+    "vlm": "C:\\Users\\vinit\\.cache\\huggingface\\hub\\models--opendatalab--MinerU2.5-2509-1.2B\\snapshots\\..."
   },
-  "formula": {
-    "enable": true,
-    "model": "unimernet"
+  "latex-delimiter-config": {
+    "display": { "left": "$$", "right": "$$" },
+    "inline": { "left": "$", "right": "$" }
   },
-  "table": {
-    "enable": true,
-    "model": "rapidtable"
+  "llm-aided-config": {
+    "title_aided": {
+      "enable": false,
+      "model": "qwen2.5-32b-instruct",
+      "api_key": "your_api_key",
+      "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1"
+    }
   },
-  "ocr": {
-    "enable": true,
-    "model": "paddleocr"
-  }
+  "config_version": "1.3.0"
 }
 ```
+
+### Custom Configuration
+
+You can edit the config file to:
+- Change LaTeX delimiters for formula output
+- Enable LLM-aided title extraction (requires API key)
+- Modify model paths (advanced users)
+
+**Note**: The script will automatically detect and use the config at `C:\Users\vinit\mineru.json`
 
 ## Performance Comparison
 
@@ -171,20 +233,29 @@ MinerU can be configured via `~/.config/mineru/mineru.json`:
 
 ### Common Issues
 
-1. **Installation fails**: Try updating pip first
+1. **"Models not found" error**: Run `mineru-models-download` first
+   ```bash
+   mineru-models-download
+   ```
+
+2. **Installation fails**: Try updating pip first
    ```bash
    pip install --upgrade pip
    pip install -U mineru[core]
    ```
 
-2. **GPU not detected**: Install CUDA-specific version
+3. **GPU not detected**: Install CUDA-specific version
    ```bash
    pip install -U mineru[full]
    ```
 
-3. **Timeout errors**: Large PDFs may need longer processing time
+4. **Config file not found**: Ensure `mineru-models-download` completed successfully
+   - Check if `C:\Users\vinit\mineru.json` exists (Windows)
+   - Models should be in `~/.cache/huggingface/hub/`
 
-4. **OCR accuracy**: For scanned documents, ensure high resolution and good quality
+5. **Timeout errors**: Large PDFs may need longer processing time
+
+6. **OCR accuracy**: For scanned documents, ensure high resolution and good quality
 
 ### Environment Requirements
 
@@ -223,3 +294,29 @@ documents = loader.load()
 - [MinerU Documentation](https://opendatalab.github.io/MinerU/)
 - [MinerU 2.5 Technical Report](https://arxiv.org/abs/2509.22186)
 - [PyMuPDF Documentation](https://pymupdf.readthedocs.io/)
+
+### MinerU logging and troubleshooting
+
+Minor note about logs: MinerU (and the ONNX Runtime used for model inference) writes most of its diagnostic and verbose messages to stderr rather than stdout. The `pdf_to_json_mineru_enhanced.py` script redirects stderr to stdout and streams the combined output so you see MinerU's verbose logs in real time when running the script with `--verbose`.
+
+PowerShell example (Windows) to run the script and see verbose MinerU output:
+
+```powershell
+cd scripts
+python .\pdf_to_json_mineru_enhanced.py ..\src\data\AyurCheck_API-Vol-1.pdf --verbose
+```
+
+If you still don't see MinerU logs:
+- Ensure `mineru` is in your PATH: run `mineru --help` in PowerShell.
+- Confirm the MinerU config exists at `C:\Users\vinit\mineru.json` (created by `mineru-models-download`).
+- Run `mineru -p path\to\pdf -o outdir --verbose --config C:\Users\vinit\mineru.json` directly to check mineru CLI behavior.
+- Check that ONNX Runtime's verbosity is enabled with `ORT_LOG_LEVEL=0` and `ORT_LOG_VERBOSITY=1` (the script sets these when on Windows).
+
+If MinerU still exits immediately with no output, capture full command output to a file to inspect both stdout and stderr (PowerShell):
+
+```powershell
+python .\pdf_to_json_mineru_enhanced.py ..\src\data\AyurCheck_API-Vol-1.pdf --verbose *> mineru_debug.log
+notepad mineru_debug.log
+```
+
+This will collect all output (both stdout and stderr) into `mineru_debug.log` for inspection.
