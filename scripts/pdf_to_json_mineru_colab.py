@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """
-Enhanced script to convert PDF to JSON using MinerU with configuration setup
-This script includes automatic configuration setup and better error handling
+Colab-compatible script to convert PDF to JSON using MinerU
+This version handles Jupyter/Colab kernel arguments and provides both
+function-based and command-line interfaces
 """
 
 import json
@@ -122,50 +123,31 @@ def run_mineru_conversion(pdf_path: str, output_dir: str, config: Dict[str, Any]
         
         print(f"Running MinerU command: {' '.join(cmd)}")
         print("⏳ This may take several minutes, especially on first run (downloading models)...")
-        print("=" * 80)
         
-        # Run with real-time output - flush both stdout and stderr immediately
-        # MinerU writes progress info to stderr, so we need to show it in real-time
-        process = subprocess.Popen(
-            cmd, 
-            stdout=subprocess.PIPE, 
-            stderr=subprocess.STDOUT,  # Merge stderr into stdout for real-time display
-            text=True, 
-            universal_newlines=True,
-            bufsize=1  # Line buffered
-        )
+        # Run with real-time output
+        process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, 
+                                 text=True, universal_newlines=True)
         
-        # Print real-time output (includes both stdout and stderr)
-        had_error = False
-        error_lines = []
-        for line in iter(process.stdout.readline, ''):
-            if line:
-                # Print without extra indentation to show progress bars properly
-                print(line.rstrip())
-                sys.stdout.flush()  # Force immediate display
-                
-                # Check for error indicators
-                if 'ERROR' in line or 'Traceback' in line or 'Error' in line or 'bad allocation' in line:
-                    had_error = True
-                    error_lines.append(line.rstrip())
+        # Print real-time output
+        while True:
+            output = process.stdout.readline()
+            if output == '' and process.poll() is not None:
+                break
+            if output:
+                print(f"   {output.strip()}")
         
         # Wait for completion
-        return_code = process.wait()
+        return_code = process.poll()
         
-        print("=" * 80)
-        if return_code == 0 and not had_error:
-            print("✅ MinerU conversion completed successfully!")
+        if return_code == 0:
+            print("MinerU conversion completed successfully!")
             return True
-        elif had_error:
-            print(f"⚠️ MinerU completed with errors (likely memory issue)")
-            print(f"💡 Try one of these solutions:")
-            print(f"   1. Process a smaller/simpler PDF")
-            print(f"   2. Disable table processing: use --mode text")
-            print(f"   3. Close other applications to free up RAM")
-            print(f"   4. Use OCR-only mode: python ... --ocr-only")
-            return False
         else:
-            print(f"❌ MinerU conversion failed with return code {return_code}")
+            # Get error output
+            stderr_output = process.stderr.read()
+            print(f"MinerU conversion failed with return code {return_code}")
+            if stderr_output:
+                print(f"Error output: {stderr_output}")
             return False
         
     except subprocess.TimeoutExpired:
@@ -431,27 +413,130 @@ def convert_pdf_to_json_mineru(pdf_path: str, output_path: str = None,
             print(f"Error saving JSON output: {e}")
             return False
 
+# ============================================================================
+# COLAB-FRIENDLY FUNCTION INTERFACE
+# ============================================================================
+
+def convert_pdf(pdf_path: str, output_path: str = None, verbose: bool = False, 
+                ocr_only: bool = False) -> bool:
+    """
+    Colab-friendly function to convert PDF to JSON
+    
+    Args:
+        pdf_path (str): Path to the input PDF file
+        output_path (str): Path for the output JSON file (optional)
+        verbose (bool): Enable verbose output
+        ocr_only (bool): Use OCR-only mode for scanned PDFs
+        
+    Returns:
+        bool: True if conversion successful, False otherwise
+        
+    Example:
+        # Basic usage
+        convert_pdf('/content/document.pdf')
+        
+        # With output path
+        convert_pdf('/content/document.pdf', '/content/output.json')
+        
+        # With options
+        convert_pdf('/content/document.pdf', verbose=True, ocr_only=False)
+    """
+    config = {
+        "verbose": verbose,
+        "ocr_only": ocr_only
+    }
+    
+    return convert_pdf_to_json_mineru(pdf_path, output_path, config)
+
+# ============================================================================
+# COMMAND LINE INTERFACE (with Jupyter/Colab compatibility)
+# ============================================================================
+
+def is_running_in_jupyter():
+    """Check if running in Jupyter/Colab environment"""
+    try:
+        get_ipython()
+        return True
+    except NameError:
+        return False
+
+def filter_jupyter_args(args):
+    """Filter out Jupyter/Colab specific arguments"""
+    filtered = []
+    i = 0
+    while i < len(args):
+        arg = args[i]
+        # Skip Jupyter kernel connection file arguments
+        if arg in ['-f', '--f', '--ip', '--stdin', '--control', '--hb', '--shell', '--iopub', '--Session.signature_scheme', '--Session.key']:
+            # Skip this argument and potentially its value
+            i += 2 if i + 1 < len(args) and not args[i + 1].startswith('-') else 1
+            continue
+        elif arg.startswith(('-f=', '--f=', '--ip=', '--stdin=', '--control=', '--hb=', '--shell=', '--iopub=')):
+            # Skip arguments with = syntax
+            i += 1
+            continue
+        else:
+            filtered.append(arg)
+            i += 1
+    return filtered
+
 def main():
-    """Main function to handle command line arguments"""
+    """Main function to handle command line arguments (Jupyter/Colab compatible)"""
+    
+    # Detect Jupyter environment
+    in_jupyter = is_running_in_jupyter()
+    
+    if in_jupyter:
+        print("📓 Jupyter/Colab environment detected!")
+        print("\n💡 TIP: You can use the convert_pdf() function directly:")
+        print("   convert_pdf('/path/to/document.pdf', '/path/to/output.json')")
+        print("\nOr continue with command-line style arguments...\n")
+    
+    # Filter Jupyter-specific arguments
+    filtered_argv = filter_jupyter_args(sys.argv)
+    
+    # If only script name remains after filtering, show help
+    if len(filtered_argv) <= 1 and in_jupyter:
+        print("=" * 70)
+        print("COLAB/JUPYTER USAGE EXAMPLES:")
+        print("=" * 70)
+        print("\n# Method 1: Direct function call (recommended)")
+        print("convert_pdf('/content/document.pdf')")
+        print("\n# Method 2: With output path")
+        print("convert_pdf('/content/document.pdf', '/content/output.json')")
+        print("\n# Method 3: With options")
+        print("convert_pdf('/content/document.pdf', verbose=True)")
+        print("\n# Method 4: Magic command (command-line style)")
+        print("%run pdf_to_json_mineru_colab.py /content/document.pdf -o output.json")
+        print("=" * 70)
+        return
+    
     parser = argparse.ArgumentParser(
-        description="Convert PDF to JSON using MinerU - Advanced document parsing",
+        description="Convert PDF to JSON using MinerU - Colab Compatible Version",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
-Examples:
+Examples (Command Line):
   # Basic conversion
-  python pdf_to_json_mineru.py input.pdf
+  python pdf_to_json_mineru_colab.py input.pdf
   
   # Specify output file
-  python pdf_to_json_mineru.py input.pdf -o output.json
-  
-  # Convert the AyurCheck PDF
-  python pdf_to_json_mineru.py ../src/data/AyurCheck_API-Vol-1.pdf -o ayurcheck_mineru.json
+  python pdf_to_json_mineru_colab.py input.pdf -o output.json
   
   # Verbose output
-  python pdf_to_json_mineru.py input.pdf --verbose
+  python pdf_to_json_mineru_colab.py input.pdf --verbose
   
   # OCR-only mode (for scanned PDFs)
-  python pdf_to_json_mineru.py scanned.pdf --ocr-only
+  python pdf_to_json_mineru_colab.py scanned.pdf --ocr-only
+
+Examples (Colab/Jupyter):
+  # Direct function call
+  convert_pdf('/content/document.pdf')
+  
+  # With options
+  convert_pdf('/content/document.pdf', '/content/output.json', verbose=True)
+  
+  # Using magic command
+  %run pdf_to_json_mineru_colab.py /content/document.pdf -o output.json
 
 About MinerU:
   MinerU is a powerful document parsing tool that can extract:
@@ -470,16 +555,20 @@ About MinerU:
                        help="Enable verbose output")
     parser.add_argument("--ocr-only", action="store_true",
                        help="Use OCR-only mode for scanned PDFs")
-    parser.add_argument("--no-tables", action="store_true",
-                       help="Disable table extraction (fixes memory errors)")
     
-    args = parser.parse_args()
+    # Parse filtered arguments
+    try:
+        args = parser.parse_args(filtered_argv[1:])
+    except SystemExit as e:
+        if in_jupyter and e.code != 0:
+            print("\n💡 Hint: Try using the convert_pdf() function instead:")
+            print("   convert_pdf('/path/to/document.pdf')")
+        raise
     
     # Prepare configuration
     config = {
         "verbose": args.verbose,
-        "ocr_only": args.ocr_only,
-        "no_tables": args.no_tables
+        "ocr_only": args.ocr_only
     }
     
     # Convert the PDF
@@ -487,7 +576,11 @@ About MinerU:
     
     if not success:
         print("\n❌ PDF to JSON conversion failed!")
-        sys.exit(1)
+        if not in_jupyter:
+            sys.exit(1)
+        return False
+    
+    return True
 
 if __name__ == "__main__":
     main()

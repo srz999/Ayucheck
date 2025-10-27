@@ -4,9 +4,8 @@ import { ChatOpenAI } from '@langchain/openai';
 import { OpenAIEmbeddings } from '@langchain/openai';
 import { PromptTemplate } from '@langchain/core/prompts';
 import { RunnableSequence } from '@langchain/core/runnables';
-import { formatDocumentsAsString } from 'langchain/util/document';
+import { Document } from '@langchain/core/documents';
 import { HttpResponseOutputParser } from 'langchain/output_parsers';
-import { Document } from 'langchain/document';
 import { createVectorStoreService, type AyurvedaMetadata } from '../../../lib/vector-store';
 import fs from 'fs';
 import path from 'path';
@@ -431,18 +430,25 @@ Instructions for your response:
 6. Be comprehensive but practical in your recommendations
 7. Always emphasize consulting with qualified Ayurvedic practitioners for medical advice
 
+ALWAYS make sure any Rajahpravartin¢ Va¶¢ words like this are corrected with right unicode characters.
+
 Please provide a detailed, helpful response about the Ayurvedic topic:`);
+
+    // Helper function to format documents
+    const formatDocs = (docs: Document[]) => {
+      return docs.map(doc => doc.pageContent).join('\n\n');
+    };
 
     return RunnableSequence.from([
       {
         question: (input: { question: string; chat_history: string }) => input.question,
         chat_history: (input: { question: string; chat_history: string }) => input.chat_history,
-        context: (input: { question: string; chat_history: string }) => retriever.invoke(input.question).then(formatDocumentsAsString),
+        context: (input: { question: string; chat_history: string }) => retriever.invoke(input.question).then(formatDocs),
       },
       prompt,
       this.llm,
       new HttpResponseOutputParser(),
-    ] as any);
+    ]);
   }
 }
 

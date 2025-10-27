@@ -25,8 +25,6 @@ This directory contains scripts for converting PDF files to JSON format using di
 
 ### Installation
 
-#### Step 1: Install MinerU
-
 The script will automatically install MinerU, but you can also install manually:
 
 ```bash
@@ -38,85 +36,103 @@ For GPU acceleration (optional):
 pip install -U mineru[full]
 ```
 
-#### Step 2: Download Models (REQUIRED)
+## Usage - Complete Pipeline
 
-**IMPORTANT**: Before using MinerU, you must download the required AI models using the official tool:
+### Step 1: PDF to JSON Conversion
 
-```bash
-# Download all required models (pipeline + VLM models)
-mineru-models-download
-```
+The first step converts a PDF document into structured JSON format using MinerU.
 
-This will:
-- Download PDF-Extract-Kit models (~4GB) for layout analysis, table recognition, and formula detection
-- Download VLM models (~2.4GB) for advanced vision-language processing
-- Create configuration file at `C:\Users\<username>\mineru.json` (Windows) or `~/.mineru.json` (Linux/Mac)
-- Store models in `~/.cache/huggingface/hub/`
-
-**First-time setup takes ~10-15 minutes** depending on your internet connection.
-
-#### Step 3: Verify Installation
-
-Check that the config file was created:
-
-**Windows**:
-```powershell
-cat C:\Users\vinit\mineru.json
-```
-
-**Linux/Mac**:
-```bash
-cat ~/.mineru.json
-```
-
-You should see model paths like:
-```json
-{
-  "models-dir": {
-    "pipeline": "C:\\Users\\vinit\\.cache\\huggingface\\hub\\models--opendatalab--PDF-Extract-Kit-1.0\\...",
-    "vlm": "C:\\Users\\vinit\\.cache\\huggingface\\hub\\models--opendatalab--MinerU2.5-2509-1.2B\\..."
-  }
-}
-```
-
-## Usage
-
-### Method 1: Direct Script Execution
-
-#### Basic MinerU Conversion
+#### Method 1: Quick Start Script (Recommended)
 ```bash
 cd scripts
+./convert_with_mineru.sh
+```
+This script automatically:
+- Uses the MinerU virtual environment
+- Converts `AyurCheck_API-Vol-1.pdf` to `ayurcheck_api_vol1_mineru.json`
+- Provides progress feedback
+
+#### Method 2: Direct Script Execution
+```bash
+cd scripts
+
+# Basic MinerU Conversion
 python pdf_to_json_mineru_enhanced.py ../src/data/AyurCheck_API-Vol-1.pdf
-```
 
-#### With Custom Output Path
-```bash
+# With Custom Output Path
 python pdf_to_json_mineru_enhanced.py ../src/data/AyurCheck_API-Vol-1.pdf -o custom_output.json
-```
 
-#### Verbose Mode
-```bash
+# Verbose Mode
 python pdf_to_json_mineru_enhanced.py ../src/data/AyurCheck_API-Vol-1.pdf --verbose
-```
 
-#### OCR-Only Mode (for scanned PDFs)
-```bash
+# OCR-Only Mode (for scanned PDFs)
 python pdf_to_json_mineru_enhanced.py scanned_document.pdf --ocr-only
 ```
 
-### Method 2: Test Script
+#### Method 3: Using Virtual Environment
+```bash
+cd scripts
+
+# Activate MinerU environment and convert
+./activate_mineru.sh ../src/data/AyurCheck_API-Vol-1.pdf
+
+# Or manually activate and run
+source mineru_venv/bin/activate
+python pdf_to_json_mineru_enhanced.py ../src/data/AyurCheck_API-Vol-1.pdf
+```
+
+### Step 2: JSON to RAG-Compatible Output
+
+The second step converts the MinerU JSON output into clean, RAG-friendly formats.
+
+#### Convert to Multiple Formats
+```bash
+cd scripts
+
+# Convert MinerU JSON to RAG formats (.json, .jsonl, .md)
+python mineru_to_rag.py ../src/data/ayurcheck_api_vol1_mineru.json -o ../src/data/ayurcheck_rag
+
+# This creates:
+# - ayurcheck_rag_rag.json    (structured for web apps)
+# - ayurcheck_rag_rag.jsonl   (for vector databases) 
+# - ayurcheck_rag_rag.md      (human-readable)
+```
+
+#### Custom Output Name
+```bash
+python mineru_to_rag.py ../src/data/ayurcheck_api_vol1_mineru.json -o ../src/data/my_custom_rag
+```
+
+### Complete Pipeline Example
+```bash
+cd scripts
+
+# Step 1: PDF → MinerU JSON
+./convert_with_mineru.sh
+
+# Step 2: MinerU JSON → RAG Formats  
+python mineru_to_rag.py ../src/data/ayurcheck_api_vol1_mineru.json -o ../src/data/ayurcheck_rag_new
+
+# Result: Ready-to-use RAG files in src/data/
+```
+
+### Alternative Methods
+
+#### Test Scripts
 ```bash
 python test_mineru_conversion.py
 ```
 
-### Method 3: Compare Different Methods
+#### Compare Different Methods
 ```bash
 python compare_pdf_converters.py
 ```
 
-## Output Format
+## Output Formats
 
-MinerU produces a comprehensive JSON structure:
+### Step 1 Output: MinerU JSON
+
+MinerU produces a comprehensive JSON structure with full document analysis:
 
 ```json
 {
@@ -144,12 +160,68 @@ MinerU produces a comprehensive JSON structure:
 }
 ```
 
+### Step 2 Output: RAG-Compatible Formats
+
+The `mineru_to_rag.py` script converts MinerU output into three optimized formats:
+
+#### 1. Structured JSON (.json) - For Web Applications
+```json
+[
+  {
+    "id": "chunk_001",
+    "text": "Clean, processed text chunk",
+    "type": "text",
+    "page": 1,
+    "section": "Introduction",
+    "metadata": {
+      "source": "AyurCheck_API-Vol-1.pdf",
+      "chunk_index": 0
+    }
+  }
+]
+```
+
+#### 2. JSONL (.jsonl) - For Vector Databases
+```jsonl
+{"id": "chunk_001", "text": "Clean text chunk 1", "type": "text", "page": 1}
+{"id": "chunk_002", "text": "Clean text chunk 2", "type": "text", "page": 1}
+```
+
+#### 3. Markdown (.md) - For Human Review
+```markdown
+# Document Title
+
+## Page 1
+
+### chunk_001 (text)
+Clean, processed text chunk
+
+### chunk_002 (formula)
+Mathematical formula content
+```
+
+### Output Statistics Example
+```
+📊 Statistics:
+   Total chunks: 220
+   Text chunks: 212
+   Table chunks: 2
+   Formula chunks: 6
+   Average chunk length: 1128 characters
+```
+
 ## Script Details
 
-### `pdf_to_json_mineru.py`
-Basic MinerU converter with essential functionality.
+### PDF to JSON Conversion Scripts
 
-### `pdf_to_json_mineru_enhanced.py`
+#### `convert_with_mineru.sh` (Recommended)
+Quick start script that:
+- Automatically uses MinerU virtual environment
+- Converts the default PDF to JSON
+- Provides clear progress feedback
+- Handles virtual environment activation
+
+#### `pdf_to_json_mineru_enhanced.py`
 Advanced converter with:
 - Automatic MinerU installation
 - Configuration management
@@ -157,54 +229,58 @@ Advanced converter with:
 - Detailed output processing
 - Statistics and metadata
 
-### `test_mineru_conversion.py`
+#### `pdf_to_json_mineru.py`
+Basic MinerU converter with essential functionality.
+
+#### `activate_mineru.sh`
+Virtual environment activation script for manual conversions.
+
+### RAG Conversion Scripts
+
+#### `mineru_to_rag.py` (Essential)
+Converts MinerU JSON to RAG-friendly formats:
+- **Input**: MinerU JSON output (complex structure)
+- **Output**: Clean text chunks in 3 formats (.json, .jsonl, .md)
+- **Features**:
+  - Text cleaning and normalization
+  - Chunk size optimization (average 1128 characters)
+  - Metadata preservation
+  - Multiple output formats for different use cases
+
+### Utility Scripts
+
+#### `test_mineru_conversion.py`
 Test script specifically for converting `AyurCheck_API-Vol-1.pdf`.
 
-### `compare_pdf_converters.py`
+#### `compare_pdf_converters.py`
 Comparison tool that tests both PyMuPDF and MinerU on the same document.
+
+#### `setup_mineru_enhanced.py`
+Virtual environment setup script for MinerU installation.
 
 ## Configuration
 
-### MinerU Configuration File
-
-After running `mineru-models-download`, the configuration is stored at:
-- **Windows**: `C:\Users\<username>\mineru.json`
-- **Linux/Mac**: `~/.mineru.json`
-
-The `pdf_to_json_mineru_enhanced.py` script automatically uses this configuration file.
-
-### Configuration Structure
+MinerU can be configured via `~/.config/mineru/mineru.json`:
 
 ```json
 {
-  "models-dir": {
-    "pipeline": "C:\\Users\\vinit\\.cache\\huggingface\\hub\\models--opendatalab--PDF-Extract-Kit-1.0\\snapshots\\...",
-    "vlm": "C:\\Users\\vinit\\.cache\\huggingface\\hub\\models--opendatalab--MinerU2.5-2509-1.2B\\snapshots\\..."
+  "layout": {
+    "model": "layoutlmv3"
   },
-  "latex-delimiter-config": {
-    "display": { "left": "$$", "right": "$$" },
-    "inline": { "left": "$", "right": "$" }
+  "formula": {
+    "enable": true,
+    "model": "unimernet"
   },
-  "llm-aided-config": {
-    "title_aided": {
-      "enable": false,
-      "model": "qwen2.5-32b-instruct",
-      "api_key": "your_api_key",
-      "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1"
-    }
+  "table": {
+    "enable": true,
+    "model": "rapidtable"
   },
-  "config_version": "1.3.0"
+  "ocr": {
+    "enable": true,
+    "model": "paddleocr"
+  }
 }
 ```
-
-### Custom Configuration
-
-You can edit the config file to:
-- Change LaTeX delimiters for formula output
-- Enable LLM-aided title extraction (requires API key)
-- Modify model paths (advanced users)
-
-**Note**: The script will automatically detect and use the config at `C:\Users\vinit\mineru.json`
 
 ## Performance Comparison
 
@@ -233,29 +309,20 @@ You can edit the config file to:
 
 ### Common Issues
 
-1. **"Models not found" error**: Run `mineru-models-download` first
-   ```bash
-   mineru-models-download
-   ```
-
-2. **Installation fails**: Try updating pip first
+1. **Installation fails**: Try updating pip first
    ```bash
    pip install --upgrade pip
    pip install -U mineru[core]
    ```
 
-3. **GPU not detected**: Install CUDA-specific version
+2. **GPU not detected**: Install CUDA-specific version
    ```bash
    pip install -U mineru[full]
    ```
 
-4. **Config file not found**: Ensure `mineru-models-download` completed successfully
-   - Check if `C:\Users\vinit\mineru.json` exists (Windows)
-   - Models should be in `~/.cache/huggingface/hub/`
+3. **Timeout errors**: Large PDFs may need longer processing time
 
-5. **Timeout errors**: Large PDFs may need longer processing time
-
-6. **OCR accuracy**: For scanned documents, ensure high resolution and good quality
+4. **OCR accuracy**: For scanned documents, ensure high resolution and good quality
 
 ### Environment Requirements
 
@@ -267,14 +334,77 @@ You can edit the config file to:
 
 ## Example Output Files
 
-After running the converter, you'll find these files in `src/data/`:
-- `ayurcheck_api_vol1_mineru.json` - Main structured output
+### After Step 1 (PDF → JSON)
+Running `./convert_with_mineru.sh` creates:
+- `ayurcheck_api_vol1_mineru.json` - Complete MinerU extraction (complex structure)
+
+### After Step 2 (JSON → RAG)
+Running `python mineru_to_rag.py ... -o ayurcheck_rag` creates:
+- `ayurcheck_rag_rag.json` - Clean chunks for web applications
+- `ayurcheck_rag_rag.jsonl` - Line-delimited JSON for vector databases
+- `ayurcheck_rag_rag.md` - Human-readable markdown format
+
+### Complete File Structure
+```
+src/data/
+├── AyurCheck_API-Vol-1.pdf              # Source PDF
+├── ayurcheck_api_vol1_mineru.json       # Step 1: MinerU output
+├── ayurcheck_rag_rag.json               # Step 2: Web app format
+├── ayurcheck_rag_rag.jsonl              # Step 2: Vector DB format
+└── ayurcheck_rag_rag.md                 # Step 2: Human review format
+```
+
+### Legacy/Comparison Files
 - `ayurcheck_pymupdf_test.json` - PyMuPDF comparison output
 - `ayurcheck_mineru_test.json` - MinerU comparison output
 
-## Integration with RAG System
+## Integration with RAG Systems
 
-The JSON output is designed to work seamlessly with LangChain and RAG applications:
+### Using RAG-Compatible Output (Recommended)
+
+After running both conversion steps, use the optimized RAG formats:
+
+#### For Vector Databases (Chroma, Qdrant, Pinecone)
+```python
+import json
+
+# Load JSONL for vector database ingestion
+with open("ayurcheck_rag_rag.jsonl", "r") as f:
+    chunks = [json.loads(line) for line in f]
+
+# Each chunk is ready for embedding
+for chunk in chunks:
+    text = chunk["text"]      # Clean text for embedding
+    metadata = {
+        "id": chunk["id"],
+        "page": chunk["page"],
+        "type": chunk["type"]
+    }
+```
+
+#### For Web Applications
+```python
+import json
+
+# Load structured JSON for web app
+with open("ayurcheck_rag_rag.json", "r") as f:
+    rag_data = json.load(f)
+
+# Use with LangChain
+from langchain.schema import Document
+
+documents = [
+    Document(
+        page_content=chunk["text"],
+        metadata=chunk.get("metadata", {})
+    )
+    for chunk in rag_data
+]
+```
+
+### Using Raw MinerU Output (Advanced)
+
+For direct access to MinerU's structured output:
 
 ```python
 from langchain_community.document_loaders import JSONLoader
@@ -288,35 +418,15 @@ loader = JSONLoader(
 documents = loader.load()
 ```
 
+### Recommended Workflow
+
+1. **For Production RAG**: Use the cleaned RAG formats (`.json`, `.jsonl`)
+2. **For Development**: Review the `.md` format to verify extraction quality
+3. **For Advanced Use Cases**: Access raw MinerU JSON for custom processing
+
 ## References
 
 - [MinerU GitHub Repository](https://github.com/opendatalab/MinerU)
 - [MinerU Documentation](https://opendatalab.github.io/MinerU/)
 - [MinerU 2.5 Technical Report](https://arxiv.org/abs/2509.22186)
 - [PyMuPDF Documentation](https://pymupdf.readthedocs.io/)
-
-### MinerU logging and troubleshooting
-
-Minor note about logs: MinerU (and the ONNX Runtime used for model inference) writes most of its diagnostic and verbose messages to stderr rather than stdout. The `pdf_to_json_mineru_enhanced.py` script redirects stderr to stdout and streams the combined output so you see MinerU's verbose logs in real time when running the script with `--verbose`.
-
-PowerShell example (Windows) to run the script and see verbose MinerU output:
-
-```powershell
-cd scripts
-python .\pdf_to_json_mineru_enhanced.py ..\src\data\AyurCheck_API-Vol-1.pdf --verbose
-```
-
-If you still don't see MinerU logs:
-- Ensure `mineru` is in your PATH: run `mineru --help` in PowerShell.
-- Confirm the MinerU config exists at `C:\Users\vinit\mineru.json` (created by `mineru-models-download`).
-- Run `mineru -p path\to\pdf -o outdir --verbose --config C:\Users\vinit\mineru.json` directly to check mineru CLI behavior.
-- Check that ONNX Runtime's verbosity is enabled with `ORT_LOG_LEVEL=0` and `ORT_LOG_VERBOSITY=1` (the script sets these when on Windows).
-
-If MinerU still exits immediately with no output, capture full command output to a file to inspect both stdout and stderr (PowerShell):
-
-```powershell
-python .\pdf_to_json_mineru_enhanced.py ..\src\data\AyurCheck_API-Vol-1.pdf --verbose *> mineru_debug.log
-notepad mineru_debug.log
-```
-
-This will collect all output (both stdout and stderr) into `mineru_debug.log` for inspection.

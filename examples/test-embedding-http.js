@@ -7,10 +7,24 @@
  */
 
 import https from 'https';
-import dotenv from 'dotenv';
+import { readFileSync } from 'fs';
+import { resolve } from 'path';
 
-// Import .env.local variables
-dotenv.config({ path: '.env.local' });
+// Manually load .env.local without dotenv dependency
+try {
+  const envPath = resolve(process.cwd(), '.env.local');
+  const envContent = readFileSync(envPath, 'utf-8');
+  envContent.split('\n').forEach(line => {
+    const match = line.match(/^([^#=]+)=(.*)$/);
+    if (match) {
+      const key = match[1].trim();
+      const value = match[2].trim().replace(/^["']|["']$/g, '');
+      process.env[key] = value;
+    }
+  });
+} catch (error) {
+  console.warn('⚠️  Could not load .env.local:', error.message);
+}
 
 async function createEmbedding(text) {
   return new Promise((resolve, reject) => {

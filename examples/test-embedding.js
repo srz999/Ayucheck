@@ -6,10 +6,24 @@
  */
 
 import OpenAI from "openai";
-import dotenv from "dotenv";
-// import .env.local variables
-dotenv.config({ path: '.env.local' });
+import { readFileSync } from "fs";
+import { resolve } from "path";
 
+// Manually load .env.local without dotenv dependency
+try {
+  const envPath = resolve(process.cwd(), '.env.local');
+  const envContent = readFileSync(envPath, 'utf-8');
+  envContent.split('\n').forEach(line => {
+    const match = line.match(/^([^#=]+)=(.*)$/);
+    if (match) {
+      const key = match[1].trim();
+      const value = match[2].trim().replace(/^["']|["']$/g, '');
+      process.env[key] = value;
+    }
+  });
+} catch (error) {
+  console.warn('⚠️  Could not load .env.local:', error.message);
+}
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,

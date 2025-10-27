@@ -4,46 +4,58 @@ import { ChatOpenAI } from '@langchain/openai';
 import { OpenAIEmbeddings } from '@langchain/openai';
 import { PromptTemplate } from '@langchain/core/prompts';
 import { RunnableSequence } from '@langchain/core/runnables';
-import { Document } from '@langchain/core/documents';
+import { formatDocumentsAsString } from 'langchain/util/document';
 import { HttpResponseOutputParser } from 'langchain/output_parsers';
+import { Document } from 'langchain/document';
 import { type AyurvedaMetadata } from '../../../lib/vector-store';
+import { Pinecone } from '@pinecone-database/pinecone';
 import fs from 'fs';
 import path from 'path';
+import { v4 as uuidv4 } from 'uuid';
 
 export const dynamic = 'force-dynamic';
 
-// Qdrant-specific configuration
-const QDRANT_CONFIG = {
-  url: process.env.QDRANT_URL || 'http://localhost:6333',
-  collectionName: process.env.QDRANT_COLLECTION || 'ayurveda-knowledge',
-  apiKey: process.env.QDRANT_API_KEY, // Optional for local setup
-  useVectorDB: true,
-  vectorDBType: 'qdrant' as const,
+// Pinecone-specific configuration
+const PINECONE_CONFIG = {
+  apiKey: process.env.PINECONE_API_KEY!,
+  indexName: process.env.PINECONE_INDEX_NAME || 'ayurveda-knowledge',
+  environment: process.env.PINECONE_ENVIRONMENT || 'us-east-1-aws',
+  dimension: 1536, // text-embedding-3-small dimensions
 };
 
-// Initialize Ayurvedic RAG data for Qdrant collection
+// Initialize Pinecone client
+const pc = new Pinecone({
+  apiKey: PINECONE_CONFIG.apiKey,
+});
+
+// Initialize OpenAI embeddings
+const embeddings = new OpenAIEmbeddings({
+  openAIApiKey: process.env.OPENAI_API_KEY,
+  modelName: "text-embedding-3-small",
+  batchSize: 512,
+});
+
+// Initialize data loading flag
 let isDataLoaded = false;
 
-async function initializeQdrantCollection(): Promise<void> {
+async function initializePineconeIndex(): Promise<void> {
   if (isDataLoaded) return;
 
   try {
-    console.log('🔄 Initializing Qdrant collection with Ayurvedic data...');
+    console.log('🔄 Initializing Pinecone index with Ayurvedic data...');
     
-    // Create vector store service with Qdrant configuration
-    const { VectorStoreService } = await import('../../../lib/vector-store');
-    const vectorStoreService = new VectorStoreService(QDRANT_CONFIG);
+    const index = pc.index(PINECONE_CONFIG.indexName);
     
-    // Check if collection already has data
+    // Check if index already has data
     try {
-      const collectionInfo = await vectorStoreService.getCollectionInfo();
-      if (collectionInfo.count > 0) {
-        console.log(`✅ Collection '${QDRANT_CONFIG.collectionName}' already has ${collectionInfo.count} documents`);
+      const stats = await index.describeIndexStats();
+      if (stats.totalRecordCount && stats.totalRecordCount > 0) {
+        console.log(`✅ Index '${PINECONE_CONFIG.indexName}' already has ${stats.totalRecordCount} vectors`);
         isDataLoaded = true;
         return;
       }
     } catch (error) {
-      console.log('📝 Collection not found or empty, will create and populate...');
+      console.log('📝 Index not found or empty, will populate...');
     }
 
     // Load Ayurvedic RAG data from JSONL format
@@ -63,7 +75,6 @@ async function initializeQdrantCollection(): Promise<void> {
 
     // Convert to Document format with enhanced metadata
     const documents: Document<AyurvedaMetadata>[] = rawData.map((item: any, index: number) => {
-      // Get content from JSONL structure
       const content = item.text || '';
       const existingMetadata = item.metadata || {};
       
@@ -85,7 +96,7 @@ async function initializeQdrantCollection(): Promise<void> {
       }
 
       // Determine category from content keywords
-      let category: AyurvedaMetadata['category'] = 'pharmacopoeia'; // default
+      let category: AyurvedaMetadata['category'] = 'pharmacopoeia';
       const contentLower = content.toLowerCase();
       if (contentLower.includes('herb') || contentLower.includes('plant') || botanicalMatch) {
         category = 'herb';
@@ -97,11 +108,6 @@ async function initializeQdrantCollection(): Promise<void> {
         category = 'diagnosis';
       }
 
-      // Extract benefits and usage information
-      const benefitsMatch = content.match(/(?:benefit|use|property|action)[s]?[:\s-]+(.*?)(?:\.|$|\n)/i);
-      const usageMatch = content.match(/(?:dosage|administration|how to take|usage)[:\s-]+(.*?)(?:\.|$|\n)/i);
-      const cautionMatch = content.match(/(?:caution|contraindication|side effect|warning)[s]?[:\s-]+(.*?)(?:\.|$|\n)/i);
-
       const metadata: AyurvedaMetadata = {
         herb_name: herbNameMatch?.[1]?.trim(),
         botanical_name: botanicalMatch?.[1]?.trim(),
@@ -109,11 +115,7 @@ async function initializeQdrantCollection(): Promise<void> {
         category,
         source_document: 'Ayurvedic Pharmacopoeia Volume 1',
         page_number: existingMetadata.page || undefined,
-        benefits: benefitsMatch?.[1]?.trim(),
-        usage: usageMatch?.[1]?.trim(),
-        caution: cautionMatch?.[1]?.trim(),
         document_id: item.id || `ayur_doc_${index}`,
-        condition: undefined, // Not available in this dataset
       };
 
       return new Document<AyurvedaMetadata>({
@@ -122,21 +124,44 @@ async function initializeQdrantCollection(): Promise<void> {
       });
     });
 
-    // Add documents to Qdrant collection
-    console.log(`🔧 Adding ${documents.length} documents to Qdrant collection...`);
-    await vectorStoreService.addDocuments(documents);
+    // Generate embeddings for all documents
+    console.log(`🧠 Generating embeddings for ${documents.length} documents...`);
+    const texts = documents.map(doc => doc.pageContent);
+    const documentEmbeddings = await embeddings.embedDocuments(texts);
+
+    // Prepare vectors for Pinecone
+    const vectors = documents.map((doc, i) => ({
+      id: `doc_${i}_${uuidv4().slice(0, 8)}`, // Pinecone-compatible ID
+      values: documentEmbeddings[i],
+      metadata: {
+        content: doc.pageContent,
+        ...doc.metadata,
+      },
+    }));
+
+    // Upload vectors to Pinecone in batches
+    const batchSize = 100; // Pinecone supports larger batches than Qdrant
+    console.log(`📤 Uploading ${vectors.length} vectors to Pinecone in batches of ${batchSize}...`);
     
-    console.log('✅ Qdrant collection initialized successfully with Ayurvedic data');
+    for (let i = 0; i < vectors.length; i += batchSize) {
+      const batch = vectors.slice(i, i + batchSize);
+      console.log(`📤 Uploading batch ${Math.floor(i / batchSize) + 1}/${Math.ceil(vectors.length / batchSize)} with ${batch.length} vectors...`);
+      
+      await index.upsert(batch);
+      console.log(`✅ Batch ${Math.floor(i / batchSize) + 1} uploaded successfully`);
+    }
+
+    console.log('✅ Pinecone index initialized successfully with Ayurvedic data');
     isDataLoaded = true;
   } catch (error) {
-    console.error('❌ Error initializing Qdrant collection:', error);
-    throw new Error(`Failed to initialize Qdrant collection: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    console.error('❌ Error initializing Pinecone index:', error);
+    throw new Error(`Failed to initialize Pinecone index: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
 }
 
 // Advanced RAG prompt template for Ayurvedic medicine
 const ragPromptTemplate = PromptTemplate.fromTemplate(`
-You are an expert Ayurvedic medicine consultant with deep knowledge of traditional Indian medicine practices. You have access to authoritative Ayurvedic texts and pharmacopoeia data through a vector database powered by Qdrant.
+You are an expert Ayurvedic medicine consultant with deep knowledge of traditional Indian medicine practices. You have access to authoritative Ayurvedic texts and pharmacopoeia data through a cloud vector database powered by Pinecone.
 
 Context from Ayurvedic Knowledge Base:
 {context}
@@ -156,21 +181,10 @@ Instructions:
 Answer:
 `);
 
-// Enhanced system message for Ayurvedic consultation
-const SYSTEM_MESSAGE = `You are an AI assistant specialized in Ayurvedic medicine, powered by a Qdrant vector database containing comprehensive Ayurvedic pharmacopoeia data. You provide evidence-based information about traditional Indian medicine practices, herbs, treatments, and lifestyle recommendations.
-
-Your knowledge includes:
-- Ayurvedic Pharmacopoeia Volume 1 with 220+ documented herbs and formulations
-- Traditional dosha theory and constitutional analysis
-- Classical texts and traditional practices
-- Modern applications of Ayurvedic principles
-
-Always emphasize the importance of consulting qualified Ayurvedic practitioners for personalized treatment plans.`;
-
 export async function POST(req: NextRequest) {
   try {
-    // Initialize Qdrant collection with data (if not already done)
-    await initializeQdrantCollection();
+    // Initialize Pinecone index with data (if not already done)
+    await initializePineconeIndex();
 
     const { messages } = await req.json();
     const userQuestion = messages[messages.length - 1]?.content || '';
@@ -179,31 +193,44 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'No question provided' }, { status: 400 });
     }
 
-    console.log(`🔍 Processing Ayurvedic query via Qdrant: "${userQuestion}"`);
+    console.log(`🔍 Processing Ayurvedic query via Pinecone: "${userQuestion}"`);
 
-    // Create vector store service configured for Qdrant
-    const { VectorStoreService } = await import('../../../lib/vector-store');
-    const vectorStoreService = new VectorStoreService(QDRANT_CONFIG);
+    // Generate embedding for user query
+    const queryEmbedding = await embeddings.embedQuery(userQuestion);
 
-    // Perform semantic search with optional metadata filtering
-    const relevantDocs = await vectorStoreService.similaritySearchWithScore(userQuestion, 5);
-    
-    console.log(`📊 Retrieved ${relevantDocs.length} relevant documents from Qdrant:`);
-    relevantDocs.forEach(([doc, score], index) => {
-      console.log(`   ${index + 1}. Score: ${score.toFixed(3)} - ${doc.pageContent.substring(0, 100)}...`);
-      console.log(`      Metadata: ${JSON.stringify(doc.metadata, null, 2)}`);
+    // Get Pinecone index
+    const index = pc.index(PINECONE_CONFIG.indexName);
+
+    // Perform similarity search
+    const searchResponse = await index.query({
+      vector: queryEmbedding,
+      topK: 5,
+      includeValues: false,
+      includeMetadata: true,
+    });
+
+    console.log(`📊 Retrieved ${searchResponse.matches?.length || 0} relevant documents from Pinecone:`);
+    searchResponse.matches?.forEach((match, index) => {
+      console.log(`   ${index + 1}. Score: ${match.score?.toFixed(3)} - ${(match.metadata?.content as string)?.substring(0, 100)}...`);
     });
 
     // Filter results by relevance threshold
     const relevanceThreshold = 0.7;
-    const filteredDocs = relevantDocs
-      .filter(([_, score]) => score >= relevanceThreshold)
-      .map(([doc, _]) => doc);
+    const filteredMatches = searchResponse.matches?.filter(match => (match.score || 0) >= relevanceThreshold) || [];
 
-    if (filteredDocs.length === 0) {
+    if (filteredMatches.length === 0 && searchResponse.matches) {
       console.log('⚠️ No relevant documents found above threshold, using top results');
-      filteredDocs.push(...relevantDocs.slice(0, 3).map(([doc, _]) => doc));
+      filteredMatches.push(...searchResponse.matches.slice(0, 3));
     }
+
+    // Convert Pinecone matches to LangChain Documents
+    const relevantDocs = filteredMatches.map(match => {
+      const { content, ...metadata } = match.metadata as any;
+      return new Document<AyurvedaMetadata>({
+        pageContent: content,
+        metadata: metadata as AyurvedaMetadata,
+      });
+    });
 
     // Initialize OpenAI chat model for response generation
     const chatModel = new ChatOpenAI({
@@ -213,15 +240,10 @@ export async function POST(req: NextRequest) {
       verbose: true,
     });
 
-    // Helper function to format documents (replaces formatDocumentsAsString)
-    const formatDocs = (docs: Document[]) => {
-      return docs.map(doc => doc.pageContent).join('\n\n');
-    };
-
     // Create the RAG chain using RunnableSequence
     const ragChain = RunnableSequence.from([
       {
-        context: () => formatDocs(filteredDocs),
+        context: () => formatDocumentsAsString(relevantDocs),
         question: (input: { question: string }) => input.question,
       },
       ragPromptTemplate,
@@ -234,43 +256,43 @@ export async function POST(req: NextRequest) {
       question: userQuestion,
     });
 
-    console.log('✅ Streaming Ayurvedic response powered by Qdrant vector search');
+    console.log('✅ Streaming Ayurvedic response powered by Pinecone vector search');
 
-    // Return streaming response (HttpResponseOutputParser already formats correctly for streaming)
+    // Return streaming response
     return new StreamingTextResponse(
-      stream as any,
+      stream.pipeThrough(createStreamDataTransformer()),
       {
         headers: {
           'Content-Type': 'text/plain; charset=utf-8',
-          'X-Vector-DB': 'Qdrant',
-          'X-Documents-Found': filteredDocs.length.toString(),
-          'X-Collection': QDRANT_CONFIG.collectionName,
+          'X-Vector-DB': 'Pinecone',
+          'X-Documents-Found': relevantDocs.length.toString(),
+          'X-Index-Name': PINECONE_CONFIG.indexName,
         },
       }
     );
 
   } catch (error) {
-    console.error('❌ Error in Qdrant-powered Ayurvedic RAG endpoint:', error);
+    console.error('❌ Error in Pinecone-powered Ayurvedic RAG endpoint:', error);
     
-    // Handle specific Qdrant connection errors
+    // Handle specific Pinecone errors
     if (error instanceof Error) {
-      if (error.message.includes('ECONNREFUSED') || error.message.includes('fetch failed')) {
+      if (error.message.includes('API key')) {
         return NextResponse.json({
-          error: 'Qdrant database connection failed. Please ensure Qdrant server is running on localhost:6333',
-          details: 'Run: docker run -p 6333:6333 -p 6334:6334 qdrant/qdrant:latest',
-        }, { status: 503 });
+          error: 'Pinecone API key is missing or invalid',
+          details: 'Please set PINECONE_API_KEY in your environment variables',
+        }, { status: 401 });
       }
       
-      if (error.message.includes('Collection not found')) {
+      if (error.message.includes('Index not found')) {
         return NextResponse.json({
-          error: 'Qdrant collection not found',
-          details: 'The Ayurveda knowledge collection needs to be initialized',
+          error: 'Pinecone index not found',
+          details: `Index '${PINECONE_CONFIG.indexName}' does not exist. Please create it in Pinecone console.`,
         }, { status: 404 });
       }
     }
 
     return NextResponse.json({
-      error: 'Internal server error in Qdrant RAG processing',
+      error: 'Internal server error in Pinecone RAG processing',
       details: error instanceof Error ? error.message : 'Unknown error',
     }, { status: 500 });
   }
@@ -279,24 +301,22 @@ export async function POST(req: NextRequest) {
 // Health check endpoint
 export async function GET(req: NextRequest) {
   try {
-    const { VectorStoreService } = await import('../../../lib/vector-store');
-    const vectorStoreService = new VectorStoreService(QDRANT_CONFIG);
-    
-    const info = await vectorStoreService.getCollectionInfo();
+    const index = pc.index(PINECONE_CONFIG.indexName);
+    const stats = await index.describeIndexStats();
     
     return NextResponse.json({
       status: 'healthy',
-      vectorDatabase: 'Qdrant',
-      collection: info.name,
-      documentCount: info.count,
-      qdrantUrl: QDRANT_CONFIG.url,
+      vectorDatabase: 'Pinecone',
+      indexName: PINECONE_CONFIG.indexName,
+      vectorCount: stats.totalRecordCount || 0,
+      dimension: PINECONE_CONFIG.dimension,
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
     return NextResponse.json({
       status: 'unhealthy',
       error: error instanceof Error ? error.message : 'Unknown error',
-      qdrantUrl: QDRANT_CONFIG.url,
+      indexName: PINECONE_CONFIG.indexName,
       timestamp: new Date().toISOString(),
     }, { status: 503 });
   }

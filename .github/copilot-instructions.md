@@ -44,16 +44,11 @@ interface AyurvedaMetadata {
 ### MinerU PDF Processing Pipeline
 Generate new RAG data from PDFs using the enhanced MinerU pipeline:
 ```bash
-# One-time setup: Download MinerU models (required)
-mineru-models-download  # Downloads ~6.4GB models, creates C:\Users\vinit\mineru.json
-
-# Process PDFs with downloaded models
+# Activate MinerU environment and process PDFs
 cd scripts
+./activate_mineru.sh  # Sets up Python 3.9 venv with MinerU 2.5.4
 python pdf_to_json_mineru_enhanced.py input.pdf output.json
 python mineru_to_rag.py output.json  # Creates RAG-ready files
-
-# Config location: C:\Users\vinit\mineru.json (auto-detected by script)
-# Models location: ~/.cache/huggingface/hub/
 ```
 
 ### Environment Setup & Testing
@@ -102,10 +97,9 @@ MinerU preserves semantic document structure:
 ## Production Considerations
 
 ### MinerU Processing Requirements
-- **One-time model download**: Run `mineru-models-download` (~6.4GB, downloads to `~/.cache/huggingface/hub/`)
-- **Configuration**: Stored at `C:\Users\vinit\mineru.json` (Windows) or `~/.mineru.json` (Linux/Mac)
-- **Processing time**: ~25 minutes for 241-page PDF on first run, faster on subsequent runs
-- **System requirements**: 16GB+ RAM, 20GB+ disk space for models and processing
+- **Python 3.9 virtual environment** (`scripts/mineru_venv/`)
+- **~4GB disk space** for model downloads (layoutlmv3, unimernet, rapidtable)
+- **Processing time**: ~25 minutes for 241-page PDF (includes first-time setup)
 
 ### API Route Performance
 - **ayurveda/**: In-memory JSON loading, fast startup, 220 chunks searched

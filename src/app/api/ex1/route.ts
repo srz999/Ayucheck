@@ -46,13 +46,13 @@ export async function POST(req: Request) {
        */
         const parser = new HttpResponseOutputParser();
 
-        // Create a proper chain using RunnableSequence with type assertion for compatibility
+        // Create a proper chain using RunnableSequence
         const chain = RunnableSequence.from([
             addGreeting,    // Transform the input to add greeting
             prompt,         // Apply the prompt template  
             model,          // Send to OpenAI
             parser,         // Parse the streaming response
-        ] as any);
+        ]);
 
         // Convert the response into a friendly text-stream
         const stream = await chain.stream({ message });

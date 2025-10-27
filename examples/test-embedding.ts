@@ -8,14 +8,27 @@
  */
 
 import OpenAI from "openai";
-import dotenv from "dotenv";
+import { readFileSync } from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 
-// Load environment variables from parent directory
+// Manually load .env.local without dotenv dependency
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-dotenv.config({ path: path.join(__dirname, '..', '.env.local') });
+try {
+  const envPath = path.join(__dirname, '..', '.env.local');
+  const envContent = readFileSync(envPath, 'utf-8');
+  envContent.split('\n').forEach(line => {
+    const match = line.match(/^([^#=]+)=(.*)$/);
+    if (match) {
+      const key = match[1].trim();
+      const value = match[2].trim().replace(/^["']|["']$/g, '');
+      process.env[key] = value;
+    }
+  });
+} catch (error: any) {
+  console.warn('⚠️  Could not load .env.local:', error.message);
+}
 
 // Type definitions for better understanding
 interface EmbeddingResponse {

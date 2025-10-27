@@ -52,7 +52,7 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
+# lib/ - commented out to allow src/lib directory
 lib64/
 parts/
 sdist/
@@ -61,12 +61,6 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
-
-# Exclude Next.js src and lib directories from being ignored
-!src/
-!src/**
-!lib/
-!lib/**
 
 # Jupyter Notebooks
 .ipynb_checkpoints
@@ -110,3 +104,5 @@ Network Trash Folder
 Temporary Items
 .apdisk
 qdrant_storage/
+
+!src/lib/vector-store.ts

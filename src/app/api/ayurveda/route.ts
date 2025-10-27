@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { ChatOpenAI } from '@langchain/openai';
 import { PromptTemplate } from '@langchain/core/prompts';
 import { RunnableSequence } from '@langchain/core/runnables';
-import { formatDocumentsAsString } from 'langchain/util/document';
 import { HttpResponseOutputParser } from 'langchain/output_parsers';
 import { StreamingTextResponse, createStreamDataTransformer } from 'ai';
 import fs from 'fs';
@@ -216,28 +215,34 @@ Instructions for your response:
 
 Please provide a detailed, helpful response about the Ayurvedic topic:`);
 
-    // Create the processing chain - using type assertion to bypass TypeScript issues with older LangChain versions
-    const chain = RunnableSequence.from([
+    // Create the processing chain
+    const dumy = RunnableSequence.from([
       {
-        // Input: { question: string }
-        // Output: { question: string, chat_history: string, context: string }
-        question: (input: { question: string }) => input.question,
-        chat_history: () => formattedPreviousMessages,
-        context: () => context,
+      // Input: { question: string }
+      // Output: { question: string, chat_history: string, context: string }
+      question: (input: { question: string }) => input.question,
+      chat_history: () => formattedPreviousMessages,
+      context: () => context,
       },
+      // Input: { question: string, chat_history: string, context: string }
+      // Output: ChatPromptValue (formatted prompt with variables replaced)
       prompt,
+      // Input: ChatPromptValue
+      // Output: AIMessageChunk stream (streaming LLM response)
       model,
+      // Input: AIMessageChunk stream
+      // Output: string stream (HTTP-formatted text chunks for streaming response)
       new HttpResponseOutputParser(),
-    ] as any);
+    ]);
 
     // Execute the chain
-    const stream = await chain.stream({
+    const stream = await dumy.stream({
       question,
     });
 
-    // Return the streaming response
+    // Return the streaming response (HttpResponseOutputParser already formats correctly)
     return new StreamingTextResponse(
-      stream.pipeThrough(createStreamDataTransformer())
+      stream as any
     );
 
   } catch (error: any) {

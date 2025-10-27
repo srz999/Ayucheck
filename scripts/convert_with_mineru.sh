@@ -33,12 +33,26 @@ fi
 
 echo ""
 
-# Run the conversion
+# Run the conversion using the MinerU virtual environment
 echo "🔄 Starting conversion with MinerU..."
 echo "This may take a few minutes for complex documents..."
 echo ""
 
-python3 "$SCRIPT_DIR/pdf_to_json_mineru_enhanced.py" "$PDF_PATH" -o "$OUTPUT_PATH" --verbose
+# Check if virtual environment exists
+VENV_PATH="$SCRIPT_DIR/mineru_venv"
+if [ ! -d "$VENV_PATH" ]; then
+    echo "❌ Error: MinerU virtual environment not found at $VENV_PATH"
+    echo "Please run setup_mineru_enhanced.py first to create the environment"
+    exit 1
+fi
+
+echo "🔧 Activating MinerU virtual environment..."
+source "$VENV_PATH/bin/activate"
+
+echo "🐍 Using Python: $(which python)"
+echo ""
+
+python "$SCRIPT_DIR/pdf_to_json_mineru_enhanced.py" "$PDF_PATH" -o "$OUTPUT_PATH" --verbose
 
 # Check if output was created
 if [ -f "$OUTPUT_PATH" ]; then

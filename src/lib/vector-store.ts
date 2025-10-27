@@ -5,6 +5,7 @@ import { Document } from "@langchain/core/documents";
 import { v4 as uuidv4 } from 'uuid';
 import { QdrantClient } from '@qdrant/js-client-rest';
 import type { Schemas } from '@qdrant/js-client-rest';
+import { Pinecone } from '@pinecone-database/pinecone';
 
 // Ayurveda-specific metadata interface
 export interface AyurvedaMetadata {
@@ -29,10 +30,12 @@ export interface ChromaFilter {
 // Configuration interface
 interface VectorStoreConfig {
   useVectorDB: boolean;
-  vectorDBType: 'chroma' | 'memory' | 'qdrant';
+  vectorDBType: 'chroma' | 'memory' | 'qdrant' | 'pinecone';
   chromaUrl?: string;
   qdrantUrl?: string;
   qdrantApiKey?: string;
+  pineconeApiKey?: string;
+  pineconeIndexName?: string;
   collectionName?: string;
 }
 
@@ -311,8 +314,212 @@ class QdrantVectorStore implements IVectorStore {
   }
 }
 
+/**
+ * Pinecone Vector Store Implementation
+ */
+class PineconeVectorStore implements IVectorStore {
+  private client: Pinecone;
+  private embeddings: OpenAIEmbeddings;
+  private indexName: string;
+  private initialized = false;
+
+  constructor(config: { apiKey: string; indexName: string }, embeddings: OpenAIEmbeddings) {
+    this.client = new Pinecone({
+      apiKey: config.apiKey,
+    });
+    this.embeddings = embeddings;
+    this.indexName = config.indexName;
+  }
+
+  private async ensureIndex(): Promise<void> {
+    if (this.initialized) return;
+
+    try {
+      // Check if index exists - if this doesn't throw, index exists
+      const index = this.client.index(this.indexName);
+      await index.describeIndexStats();
+      
+      console.log(`✅ Pinecone index already exists: ${this.indexName}`);
+      this.initialized = true;
+    } catch (error) {
+      console.error('❌ Error accessing Pinecone index:', error);
+      throw new Error(`Pinecone index '${this.indexName}' not found. Please create it in Pinecone console.`);
+    }
+  }
+
+  async addDocuments(documents: Document<AyurvedaMetadata>[]): Promise<void> {
+    await this.ensureIndex();
+
+    try {
+      console.log(`📚 Adding ${documents.length} documents to Pinecone...`);
+      
+      // Generate embeddings for all documents
+      const texts = documents.map(doc => doc.pageContent);
+      const embeddings = await this.embeddings.embedDocuments(texts);
+
+      // Convert documents to Pinecone vectors
+      const vectors = documents.map((doc, i) => ({
+        id: `doc_${i}_${uuidv4().slice(0, 8)}`,
+        values: embeddings[i],
+        metadata: {
+          content: doc.pageContent,
+          ...doc.metadata,
+        },
+      }));
+
+      // Get index
+      const index = this.client.index(this.indexName);
+
+      // Batch upload vectors (Pinecone supports up to 1000 vectors per batch)
+      const batchSize = 100;
+      for (let i = 0; i < vectors.length; i += batchSize) {
+        const batch = vectors.slice(i, i + batchSize);
+        console.log(`📤 Uploading batch ${Math.floor(i / batchSize) + 1}/${Math.ceil(vectors.length / batchSize)} with ${batch.length} vectors...`);
+        
+        await index.upsert(batch);
+        console.log(`✅ Batch ${Math.floor(i / batchSize) + 1} uploaded successfully`);
+      }
+
+      console.log(`✅ Added ${documents.length} documents to Pinecone`);
+    } catch (error) {
+      console.error('❌ Error adding documents to Pinecone:', error);
+      throw error;
+    }
+  }
+
+  async similaritySearch(
+    query: string, 
+    k: number = 5, 
+    filter?: Partial<AyurvedaMetadata>
+  ): Promise<Document<AyurvedaMetadata>[]> {
+    await this.ensureIndex();
+
+    try {
+      // Generate query embedding
+      const queryEmbedding = await this.embeddings.embedQuery(query);
+
+      // Get index
+      const index = this.client.index(this.indexName);
+
+      // Build Pinecone filter
+      let pineconeFilter: Record<string, any> | undefined;
+      if (filter) {
+        pineconeFilter = this.buildPineconeFilter(filter);
+      }
+
+      // Perform search
+      const searchResult = await index.query({
+        vector: queryEmbedding,
+        topK: k,
+        filter: pineconeFilter,
+        includeValues: false,
+        includeMetadata: true,
+      });
+
+      // Convert results back to Documents
+      const documents = (searchResult.matches || []).map(match => {
+        const { content, ...metadata } = match.metadata as any;
+        return new Document<AyurvedaMetadata>({
+          pageContent: content,
+          metadata: metadata as AyurvedaMetadata,
+        });
+      });
+
+      console.log(`🔍 Found ${documents.length} similar documents in Pinecone`);
+      return documents;
+    } catch (error) {
+      console.error('❌ Error performing Pinecone similarity search:', error);
+      throw error;
+    }
+  }
+
+  async similaritySearchWithScore(
+    query: string, 
+    k: number = 5, 
+    filter?: Partial<AyurvedaMetadata>
+  ): Promise<[Document<AyurvedaMetadata>, number][]> {
+    await this.ensureIndex();
+
+    try {
+      const queryEmbedding = await this.embeddings.embedQuery(query);
+      const index = this.client.index(this.indexName);
+
+      let pineconeFilter: Record<string, any> | undefined;
+      if (filter) {
+        pineconeFilter = this.buildPineconeFilter(filter);
+      }
+
+      const searchResult = await index.query({
+        vector: queryEmbedding,
+        topK: k,
+        filter: pineconeFilter,
+        includeValues: false,
+        includeMetadata: true,
+      });
+
+      const results: [Document<AyurvedaMetadata>, number][] = (searchResult.matches || []).map(match => {
+        const { content, ...metadata } = match.metadata as any;
+        const document = new Document<AyurvedaMetadata>({
+          pageContent: content,
+          metadata: metadata as AyurvedaMetadata,
+        });
+        return [document, match.score || 0];
+      });
+
+      console.log(`🔍 Found ${results.length} similar documents with scores in Pinecone`);
+      return results;
+    } catch (error) {
+      console.error('❌ Error performing Pinecone similarity search with scores:', error);
+      throw error;
+    }
+  }
+
+  private buildPineconeFilter(filter: Partial<AyurvedaMetadata>): Record<string, any> {
+    const pineconeFilter: Record<string, any> = {};
+
+    Object.entries(filter).forEach(([key, value]) => {
+      if (typeof value === 'string') {
+        pineconeFilter[key] = { $eq: value };
+      } else if (typeof value === 'number') {
+        pineconeFilter[key] = { $eq: value };
+      } else if (typeof value === 'boolean') {
+        pineconeFilter[key] = { $eq: value };
+      }
+    });
+
+    return pineconeFilter;
+  }
+
+  async deleteCollection(): Promise<void> {
+    try {
+      // Note: Pinecone doesn't have a direct delete collection method
+      // You would need to delete the index from Pinecone console
+      console.log(`🗑️ Pinecone index deletion must be done through Pinecone console: ${this.indexName}`);
+      this.initialized = false;
+    } catch (error) {
+      console.error('❌ Error with Pinecone index deletion:', error);
+      throw error;
+    }
+  }
+
+  async getCollectionInfo(): Promise<{ count: number; name: string }> {
+    try {
+      await this.ensureIndex();
+      const index = this.client.index(this.indexName);
+      const stats = await index.describeIndexStats();
+      return {
+        count: stats.totalRecordCount || 0,
+        name: this.indexName,
+      };
+    } catch (error) {
+      console.error('❌ Error getting Pinecone index info:', error);
+      throw error;
+    }
+  }
+}
+
 export class VectorStoreService implements IVectorStore {
-  private vectorStore!: Chroma | MemoryVectorStore | QdrantVectorStore;
+  private vectorStore!: Chroma | MemoryVectorStore | QdrantVectorStore | PineconeVectorStore;
   private embeddings: OpenAIEmbeddings;
   private config: VectorStoreConfig;
   private initialized = false;
@@ -330,7 +537,18 @@ export class VectorStoreService implements IVectorStore {
     if (this.initialized) return;
 
     if (this.config.useVectorDB) {
-      if (this.config.vectorDBType === 'qdrant') {
+      if (this.config.vectorDBType === 'pinecone') {
+        try {
+          this.vectorStore = new PineconeVectorStore({
+            apiKey: this.config.pineconeApiKey || process.env.PINECONE_API_KEY!,
+            indexName: this.config.pineconeIndexName || 'ayurveda-knowledge',
+          }, this.embeddings);
+          console.log('✅ Pinecone vector store initialized');
+        } catch (error) {
+          console.warn('⚠️ Pinecone not available, falling back to in-memory store:', error);
+          this.vectorStore = new MemoryVectorStore(this.embeddings);
+        }
+      } else if (this.config.vectorDBType === 'qdrant') {
         try {
           this.vectorStore = new QdrantVectorStore({
             url: this.config.qdrantUrl || 'http://localhost:6333',
@@ -398,7 +616,10 @@ export class VectorStoreService implements IVectorStore {
     try {
       let results: any[];
 
-      if (this.vectorStore instanceof QdrantVectorStore) {
+      if (this.vectorStore instanceof PineconeVectorStore) {
+        // Use Pinecone's native similarity search
+        results = await this.vectorStore.similaritySearch(query, k, filter);
+      } else if (this.vectorStore instanceof QdrantVectorStore) {
         // Use Qdrant's native similarity search
         results = await this.vectorStore.similaritySearch(query, k, filter);
       } else if (this.vectorStore instanceof Chroma && filter) {
@@ -436,7 +657,10 @@ export class VectorStoreService implements IVectorStore {
     try {
       let results: any[];
 
-      if (this.vectorStore instanceof QdrantVectorStore) {
+      if (this.vectorStore instanceof PineconeVectorStore) {
+        // Use Pinecone's native similarity search with scores
+        results = await this.vectorStore.similaritySearchWithScore(query, k, filter);
+      } else if (this.vectorStore instanceof QdrantVectorStore) {
         // Use Qdrant's native similarity search with scores
         results = await this.vectorStore.similaritySearchWithScore(query, k, filter);
       } else if (this.vectorStore instanceof Chroma && filter) {
@@ -493,7 +717,9 @@ export class VectorStoreService implements IVectorStore {
   async deleteCollection(): Promise<void> {
     await this.initializeVectorStore();
     
-    if (this.vectorStore instanceof QdrantVectorStore) {
+    if (this.vectorStore instanceof PineconeVectorStore) {
+      await this.vectorStore.deleteCollection();
+    } else if (this.vectorStore instanceof QdrantVectorStore) {
       await this.vectorStore.deleteCollection();
     } else if (this.vectorStore instanceof Chroma) {
       try {
@@ -513,7 +739,9 @@ export class VectorStoreService implements IVectorStore {
   async getCollectionInfo(): Promise<{ count: number; name: string }> {
     await this.initializeVectorStore();
     
-    if (this.vectorStore instanceof QdrantVectorStore) {
+    if (this.vectorStore instanceof PineconeVectorStore) {
+      return await this.vectorStore.getCollectionInfo();
+    } else if (this.vectorStore instanceof QdrantVectorStore) {
       return await this.vectorStore.getCollectionInfo();
     } else if (this.vectorStore instanceof Chroma) {
       try {
@@ -539,11 +767,13 @@ export class VectorStoreService implements IVectorStore {
 export function createVectorStoreService(): VectorStoreService {
   const config: VectorStoreConfig = {
     useVectorDB: process.env.USE_VECTOR_DB === 'true',
-    vectorDBType: (process.env.VECTOR_DB_TYPE as 'chroma' | 'memory' | 'qdrant') || 'memory',
+    vectorDBType: (process.env.VECTOR_DB_TYPE as 'chroma' | 'memory' | 'qdrant' | 'pinecone') || 'memory',
     chromaUrl: process.env.CHROMA_URL,
     qdrantUrl: process.env.QDRANT_URL,
     qdrantApiKey: process.env.QDRANT_API_KEY,
-    collectionName: process.env.QDRANT_COLLECTION || process.env.CHROMA_COLLECTION_NAME || 'ayurveda-knowledge',
+    pineconeApiKey: process.env.PINECONE_API_KEY,
+    pineconeIndexName: process.env.PINECONE_INDEX_NAME,
+    collectionName: process.env.QDRANT_COLLECTION || process.env.CHROMA_COLLECTION_NAME || process.env.PINECONE_INDEX_NAME || 'ayurveda-knowledge',
   };
 
   return new VectorStoreService(config);
