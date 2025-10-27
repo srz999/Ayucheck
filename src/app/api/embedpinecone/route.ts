@@ -15,6 +15,11 @@ import { v4 as uuidv4 } from 'uuid';
 
 export const dynamic = 'force-dynamic';
 
+// Log environment variables for debugging
+console.log('🔑 PINECONE_API_KEY loaded:', process.env.PINECONE_API_KEY ? `${process.env.PINECONE_API_KEY.substring(0, 10)}...` : 'NOT FOUND');
+console.log('📍 PINECONE_INDEX_NAME:', process.env.PINECONE_INDEX_NAME || 'ayurveda-knowledge (default)');
+console.log('🌍 PINECONE_ENVIRONMENT:', process.env.PINECONE_ENVIRONMENT || 'us-east-1-aws (default)');
+
 // Pinecone-specific configuration
 const PINECONE_CONFIG = {
   apiKey: process.env.PINECONE_API_KEY!,
