@@ -236,9 +236,9 @@ export async function POST(req: NextRequest) {
 
     console.log('✅ Streaming Ayurvedic response powered by Qdrant vector search');
 
-    // Return streaming response (HttpResponseOutputParser already formats correctly for streaming)
+    // Return streaming response with transformer for useChat compatibility
     return new StreamingTextResponse(
-      stream as any,
+      stream.pipeThrough(createStreamDataTransformer()),
       {
         headers: {
           'Content-Type': 'text/plain; charset=utf-8',
