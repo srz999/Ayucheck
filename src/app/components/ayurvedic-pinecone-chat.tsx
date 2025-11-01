@@ -31,8 +31,10 @@ I'm enhanced with **Pinecone vector database** for cloud-scale semantic understa
 
 ## 📖 Available Knowledge Bases
 
+- **Ayurvedic Therapies**: Therapeutic recommendations and treatment approaches for various illnesses, including classical formulations and Panchakarma procedures
 - **Skin Diseases**: Ayurvedic diet & lifestyle guidelines for skin health
 - **Mental Health**: Psychiatric disorders and mental wellness in Ayurveda
+
 
 ---
 
