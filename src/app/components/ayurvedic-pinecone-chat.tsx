@@ -4,6 +4,7 @@ import { useChat } from 'ai/react';
 import { useRef, useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import MarkdownRenderer from './markdown-renderer';
 
 export default function AyurvedicPineconeChat() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -15,20 +16,29 @@ export default function AyurvedicPineconeChat() {
     initialMessages: [{
       id: 'welcome',
       role: 'assistant',
-      content: `🌲 **Welcome to Pinecone-Powered Ayurvedic Knowledge Assistant**
+      content: `# 🌲 Welcome to Pinecone-Powered Ayurvedic Knowledge Assistant
 
 I'm enhanced with **Pinecone vector database** for cloud-scale semantic understanding and enterprise-grade knowledge retrieval. This advanced system offers:
 
-• **🚀 Enterprise Scale**: Pinecone's cloud infrastructure for unlimited scalability
-• **⚡ Blazing Performance**: Globally distributed vector search with sub-100ms latency  
-• **🧠 Advanced AI**: State-of-the-art embeddings with semantic understanding
-• **🔍 Intelligent Filtering**: Production-ready metadata queries and hybrid search
-• **📚 Comprehensive Knowledge**: Full Ayurvedic Pharmacopoeia with 220+ documented entries
-• **🌐 Global Availability**: Cloud-hosted with 99.9% uptime guarantee
+## ✨ Key Features
+
+- **🚀 Enterprise Scale**: Pinecone's cloud infrastructure for unlimited scalability
+- **⚡ Blazing Performance**: Globally distributed vector search with sub-100ms latency  
+- **🧠 Advanced AI**: State-of-the-art embeddings with semantic understanding
+- **🔍 Intelligent Filtering**: Production-ready metadata queries and hybrid search
+- **📚 Comprehensive Knowledge**: Full Ayurvedic data with 300+ documented entries
+- **🌐 Global Availability**: Cloud-hosted with 99.9% uptime guarantee
+
+## 📖 Available Knowledge Bases
+
+- **Skin Diseases**: Ayurvedic diet & lifestyle guidelines for skin health
+- **Mental Health**: Psychiatric disorders and mental wellness in Ayurveda
+
+---
 
 *Powered by Pinecone Cloud Vector Database + OpenAI Embeddings for enterprise-grade accuracy*
 
-What Ayurvedic wisdom would you like to explore today?`
+**What Ayurvedic wisdom would you like to explore today?**`
     }]
   });
 
@@ -148,9 +158,16 @@ What Ayurvedic wisdom would you like to explore today?`
                       : 'bg-white text-gray-900 border border-green-200'
                   }`}
                 >
-                  <div className="text-sm whitespace-pre-wrap">
-                    {message.content}
-                  </div>
+                  {message.role === 'user' ? (
+                    <div className="text-sm whitespace-pre-wrap">
+                      {message.content}
+                    </div>
+                  ) : (
+                    <MarkdownRenderer 
+                      content={message.content}
+                      className="text-sm"
+                    />
+                  )}
                   {message.role === 'assistant' && (
                     <div className="mt-2 pt-2 border-t border-green-100 text-xs text-green-600">
                       🌲 Powered by Pinecone Cloud Vector Search

@@ -24,6 +24,9 @@
     "openai": "^4.37.1",
     "react": "^18",
     "react-dom": "^18",
+    "react-markdown": "^10.1.0",
+    "rehype-raw": "^7.0.0",
+    "remark-gfm": "^4.0.1",
     "tailwind-merge": "^2.2.2",
     "tailwindcss-animate": "^1.0.7",
     "uuid": "^13.0.0"
