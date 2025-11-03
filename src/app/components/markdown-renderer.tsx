@@ -10,6 +10,34 @@ interface MarkdownRendererProps {
 }
 
 export default function MarkdownRenderer({ content, className = '' }: MarkdownRendererProps) {
+  // Custom text renderer to handle citations
+  const renderTextWithCitations = (text: string) => {
+    const parts = text.split(/(【[^】]+】)/g);
+    
+    return parts.map((part, index) => {
+      const citationMatch = part.match(/【([^】]+)】/);
+      if (citationMatch) {
+        const citationText = citationMatch[1];
+        // Parse citation format: Ayurvedic Pharmacopoeia Vol-1†HerbName†Page X
+        const citationParts = citationText.split('†');
+        const source = citationParts[0] || 'Source';
+        const herbName = citationParts[1] || 'Reference';
+        const page = citationParts[2] || '';
+        
+        return (
+          <span
+            key={index}
+            className="inline-block bg-gradient-to-r from-green-500 to-green-600 text-white px-2 py-0.5 rounded-full text-xs font-semibold ml-1 cursor-help hover:from-green-600 hover:to-green-700 transition-all hover:scale-105 shadow-sm"
+            title={`Source: ${source}\nHerb: ${herbName}\n${page}`}
+          >
+            📚 {herbName} {page && `• ${page}`}
+          </span>
+        );
+      }
+      return <span key={index}>{part}</span>;
+    });
+  };
+
   return (
     <div className={`prose prose-sm max-w-none ${className}`}>
       <ReactMarkdown
@@ -38,11 +66,20 @@ export default function MarkdownRenderer({ content, className = '' }: MarkdownRe
           ),
           
           // Paragraphs
-          p: ({ children, ...props }) => (
-            <p className="mb-3 leading-relaxed" {...props}>
-              {children}
-            </p>
-          ),
+          p: ({ children, ...props }) => {
+            const processChildren = (node: any): any => {
+              if (typeof node === 'string') {
+                return renderTextWithCitations(node);
+              }
+              return node;
+            };
+            
+            return (
+              <p className="mb-3 leading-relaxed" {...props}>
+                {typeof children === 'string' ? renderTextWithCitations(children) : children}
+              </p>
+            );
+          },
           
           // Lists
           ul: ({ children, ...props }) => (
@@ -57,7 +94,7 @@ export default function MarkdownRenderer({ content, className = '' }: MarkdownRe
           ),
           li: ({ children, ...props }) => (
             <li className="ml-4" {...props}>
-              {children}
+              {typeof children === 'string' ? renderTextWithCitations(children) : children}
             </li>
           ),
           

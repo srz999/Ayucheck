@@ -164,26 +164,47 @@ async function initializePineconeIndex(): Promise<void> {
   }
 }
 
-// Advanced RAG prompt template for Ayurvedic medicine
+// Advanced RAG prompt template for Ayurvedic medicine with citation instructions
 const ragPromptTemplate = PromptTemplate.fromTemplate(`
 You are an expert Ayurvedic medicine consultant with deep knowledge of traditional Indian medicine practices. You have access to authoritative Ayurvedic texts and pharmacopoeia data through a cloud vector database powered by Pinecone.
 
-Context from Ayurvedic Knowledge Base:
+Context from Ayurvedic Knowledge Base (with citation metadata):
 {context}
 
 User Question: {question}
 
+CRITICAL CITATION RULES:
+1. **Every factual claim MUST include an inline citation** in this exact format:
+   【Ayurvedic Pharmacopoeia Vol-1†[herb_name]†Page [page_number]】
+
+2. **What to cite:**
+   - Herbal properties or benefits
+   - Therapeutic uses or indications
+   - Dosage recommendations
+   - Contraindications or side effects
+   - Traditional Ayurvedic knowledge
+   - Specific formulations or preparations
+
+3. **Citation placement:**
+   - Place immediately after the relevant sentence or paragraph
+   - Group related facts from the same source under one citation
+   - If discussing multiple herbs, cite each separately
+
+4. **When information is unavailable:**
+   - State: "The retrieved Ayurvedic texts do not contain specific information about [topic]."
+   - Recommend consulting a qualified Ayurvedic practitioner
+
 Instructions:
-- Provide accurate, evidence-based Ayurvedic guidance
-- Reference specific herbs, formulations, or practices when available in the context
+- Provide accurate, evidence-based Ayurvedic guidance with citations
+- Reference specific herbs, formulations, or practices from the context
 - Include dosha considerations (Vata, Pitta, Kapha) when relevant
 - Mention botanical names when discussing herbs
-- Include usage instructions, dosages, and contraindications when available
+- Include usage instructions, dosages, and contraindications with citations
 - Always emphasize consulting qualified Ayurvedic practitioners for personalized treatment
 - If the context doesn't contain relevant information, state this clearly
 - Maintain traditional Ayurvedic terminology while being accessible to modern readers
 
-Answer:
+Answer with citations:
 `);
 
 export async function POST(req: NextRequest) {
@@ -206,36 +227,136 @@ export async function POST(req: NextRequest) {
     // Get Pinecone index
     const index = pc.index(PINECONE_CONFIG.indexName);
 
-    // Perform similarity search
-    const searchResponse = await index.query({
-      vector: queryEmbedding,
-      topK: 5,
-      includeValues: false,
-      includeMetadata: true,
+    // Define all namespaces to search
+    const namespaces = [
+      '', // default namespace (pharmacopoeia)
+      'skin-diseases',
+      'skin-diseases-tables',
+      'mental-disorders',
+      'mental-disorders-tables',
+    ];
+
+    console.log(`🔍 Searching across ${namespaces.length} namespaces...`);
+
+    // Search all namespaces in parallel
+    const searchPromises = namespaces.map(async (ns) => {
+      try {
+        const nsQuery = index.namespace(ns);
+        const response = await nsQuery.query({
+          vector: queryEmbedding,
+          topK: 5, // Get top 5 from each namespace
+          includeValues: false,
+          includeMetadata: true,
+        });
+        
+        // Tag matches with namespace for debugging
+        if (response.matches) {
+          response.matches.forEach(match => {
+            if (match.metadata) {
+              (match.metadata as any).namespace = ns || 'default';
+            }
+          });
+        }
+        
+        return response.matches || [];
+      } catch (error) {
+        console.error(`❌ Error searching namespace "${ns}":`, error);
+        return [];
+      }
     });
 
-    console.log(`📊 Retrieved ${searchResponse.matches?.length || 0} relevant documents from Pinecone:`);
-    searchResponse.matches?.forEach((match, index) => {
-      console.log(`   ${index + 1}. Score: ${match.score?.toFixed(3)} - ${(match.metadata?.content as string)?.substring(0, 100)}...`);
+    // Wait for all searches to complete
+    const allMatches = (await Promise.all(searchPromises)).flat();
+
+    // Sort all matches by score (highest first)
+    allMatches.sort((a, b) => (b.score || 0) - (a.score || 0));
+
+    // Take top 10 overall results
+    const topMatches = allMatches.slice(0, 10);
+
+    console.log(`📊 Retrieved ${allMatches.length} total documents from ${namespaces.length} namespaces:`);
+    topMatches.forEach((match, index) => {
+      const ns = (match.metadata as any)?.namespace || 'unknown';
+      const content = (match.metadata?.content || match.metadata?.text) as string;
+      console.log(`   ${index + 1}. [${ns}] Score: ${match.score?.toFixed(4)} - ${content?.substring(0, 100)}...`);
     });
 
     // Filter results by relevance threshold
-    const relevanceThreshold = 0.7;
-    const filteredMatches = searchResponse.matches?.filter(match => (match.score || 0) >= relevanceThreshold) || [];
+    const relevanceThreshold = 0.35; // Lowered from 0.7 to capture table data
+    const filteredMatches = topMatches.filter(match => (match.score || 0) >= relevanceThreshold) || [];
 
-    if (filteredMatches.length === 0 && searchResponse.matches) {
-      console.log('⚠️ No relevant documents found above threshold, using top results');
-      filteredMatches.push(...searchResponse.matches.slice(0, 3));
+    if (filteredMatches.length === 0 && topMatches.length > 0) {
+      console.log('⚠️ No relevant documents found above threshold, using top 5 results');
+      filteredMatches.push(...topMatches.slice(0, 5));
     }
 
     // Convert Pinecone matches to LangChain Documents
     const relevantDocs = filteredMatches.map(match => {
-      const { content, ...metadata } = match.metadata as any;
+      const metadata = match.metadata as any;
+      
+      // Handle different metadata structures (original vs table data)
+      const pageContent = metadata.content || metadata.text || '';
+      const namespace = metadata.namespace || 'default';
+      
+      // Construct source document based on namespace
+      let sourceDocument = 'Ayurvedic Pharmacopoeia Volume 1';
+      if (namespace.includes('skin-diseases')) {
+        sourceDocument = 'Ayurveda Guidelines for Skin Diseases';
+      } else if (namespace.includes('mental-disorders')) {
+        sourceDocument = 'Ayurveda Guidelines for Mental Health';
+      }
+      
+      // Extract clean metadata
+      const cleanMetadata: AyurvedaMetadata = {
+        source_document: sourceDocument,
+        page_number: metadata.page || metadata.page_number,
+        herb_name: metadata.herb_name,
+        botanical_name: metadata.botanical_name,
+        dosha_type: metadata.dosha_type,
+        category: metadata.category || (metadata.type === 'table' ? 'clinical-table' as any : 'pharmacopoeia'),
+        document_id: match.id,
+      };
+      
       return new Document<AyurvedaMetadata>({
-        pageContent: content,
-        metadata: metadata as AyurvedaMetadata,
+        pageContent,
+        metadata: cleanMetadata,
       });
     });
+
+    // Helper function to format documents with citation metadata
+    const formatDocsWithCitations = (docs: Document<AyurvedaMetadata>[]) => {
+      return docs.map((doc, index) => {
+        const metadata = doc.metadata;
+        const sourceDoc = metadata.source_document || 'Ayurvedic Source';
+        const pageNumber = metadata.page_number || 'N/A';
+        const herbName = metadata.herb_name || 'Clinical Information';
+        const botanicalName = metadata.botanical_name ? ` (${metadata.botanical_name})` : '';
+        const doshaType = metadata.dosha_type ? ` [${metadata.dosha_type} balancing]` : '';
+        const category = metadata.category || 'general';
+        
+        // Format citation based on source document type
+        let citationInfo = '';
+        if (sourceDoc.includes('Pharmacopoeia')) {
+          citationInfo = `【Ayurvedic Pharmacopoeia Vol-1†${herbName}†Page ${pageNumber}】`;
+        } else if (sourceDoc.includes('Skin Diseases')) {
+          citationInfo = `【Ayurveda Guidelines for Skin Diseases†Page ${pageNumber}】`;
+        } else if (sourceDoc.includes('Mental Health')) {
+          citationInfo = `【Ayurveda Guidelines for Mental Health†Page ${pageNumber}】`;
+        } else {
+          citationInfo = `【${sourceDoc}†Page ${pageNumber}】`;
+        }
+        
+        return `
+--- Document ${index + 1} ---
+Citation Info: ${citationInfo}
+Source: ${sourceDoc}${herbName !== 'Clinical Information' ? `\nHerb: ${herbName}${botanicalName}${doshaType}` : ''}
+Category: ${category}
+Content:
+${doc.pageContent}
+---
+`;
+      }).join('\n');
+    };
 
     // Initialize OpenAI chat model for response generation
     const chatModel = new ChatOpenAI({
@@ -248,7 +369,7 @@ export async function POST(req: NextRequest) {
     // Create the RAG chain using RunnableSequence
     const ragChain = RunnableSequence.from([
       {
-        context: () => formatDocumentsAsString(relevantDocs),
+        context: () => formatDocsWithCitations(relevantDocs),
         question: (input: { question: string }) => input.question,
       },
       ragPromptTemplate,
