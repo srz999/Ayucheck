@@ -1,11 +1,9 @@
-import { Chat } from "./components/chat";
- import AyurvedicPineconeChat from './components/ayurvedic-pinecone-chat';
+import IndustryStandardChat from './components/industry-standard-chat';
 
 export const runtime = 'edge';
 
 export default function Page() {
-   return <AyurvedicPineconeChat />;
-  
+   return <IndustryStandardChat />;
 }
 
  
