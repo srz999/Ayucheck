@@ -21,6 +21,207 @@ import {
 export const dynamic = 'force-dynamic';
 
 // ============================================================================
+// QUERY DEBUG LOGGER
+// ============================================================================
+
+interface LogEntry {
+  step: number;
+  timestamp: string;
+  phase: string;
+  elapsedMs: number;
+  elapsedSeconds: number;
+  narrative: string;
+  details: any;
+  duration?: number;
+}
+
+class QueryDebugLogger {
+  private logEntries: LogEntry[] = [];
+  private startTime: number;
+  private stepCounter: number = 0;
+  private queryTitle: string;
+  private logFilePath: string;
+  private query: string;
+
+  constructor(query: string) {
+    this.startTime = Date.now();
+    this.query = query;
+    this.queryTitle = this.generateQueryTitle(query);
+    this.logFilePath = this.createLogFilePath();
+    
+    this.log('INITIALIZATION', {
+      message: `Starting Hybrid RAG processing for query: "${query}"`,
+      query,
+      queryTitle: this.queryTitle,
+      timestamp: new Date().toISOString(),
+      logFile: this.logFilePath
+    });
+  }
+
+  private generateQueryTitle(query: string): string {
+    // Extract meaningful title from query (max 50 chars)
+    const cleaned = query
+      .toLowerCase()
+      .replace(/[^a-z0-9\s]/g, '')
+      .replace(/\s+/g, '-')
+      .substring(0, 50);
+    return cleaned || 'unknown-query';
+  }
+
+  private createLogFilePath(): string {
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-').split('T')[0] + '_' + 
+                      new Date().toISOString().replace(/[:.]/g, '-').split('T')[1].substring(0, 8);
+    const logsDir = path.join(process.cwd(), 'logs', 'hybrid-rag-queries');
+    
+    // Create logs directory if it doesn't exist
+    if (!fs.existsSync(logsDir)) {
+      fs.mkdirSync(logsDir, { recursive: true });
+    }
+
+    return path.join(logsDir, `${timestamp}_${this.queryTitle}.json`);
+  }
+
+  private formatNarrative(phase: string, details: any): string {
+    // Create human-readable narrative for each phase
+    switch (phase) {
+      case 'INITIALIZATION':
+        return `🚀 Started processing your question: "${details.query}"`;
+      
+      case 'REQUEST_RECEIVED':
+        const mode = details.hybridSearchAvailable ? 'hybrid (semantic + keyword)' : 'vector-only';
+        return `📋 Configuration loaded. Using ${mode} search mode with ${details.config?.topK || 'default'} results per method.`;
+      
+      case 'QUERY_CLASSIFICATION':
+        const intents = details.intents?.join(', ') || 'general query';
+        const datasets = details.recommendedDatasets?.length || 0;
+        return `🔍 Analyzed your question and identified it as: ${intents}. This will search ${datasets} specialized knowledge bases.`;
+      
+      case 'NAMESPACE_TARGETING':
+        const namespaces = details.targetNamespaces?.join(', ') || 'all namespaces';
+        const costSaving = details.estimatedCostSavings || 'unknown';
+        return `🎯 Targeting specific knowledge bases: ${namespaces}. This focused search saves ${costSaving} in processing costs.`;
+      
+      case 'QUERY_EXPANSION':
+        const original = details.original;
+        const expanded = details.expanded?.length || 0;
+        return `📝 Generated ${expanded} variations of your question to improve search coverage. Original: "${original}"`;
+      
+      case 'SEARCH_INITIATION':
+        const vectorK = details.vectorConfig?.topK || 0;
+        const keywordK = details.keywordConfig?.topK || 0;
+        return `🔎 Starting parallel search: Vector search (${vectorK} results) + BM25 keyword search (${keywordK} results)`;
+      
+      case 'SEARCH_COMPLETED':
+        const vectorCount = details.vectorResults?.count || 0;
+        const vectorTopScore = details.vectorResults?.topScores?.[0] || 'N/A';
+        const keywordCount = details.keywordResults?.count || 0;
+        const keywordTopScore = details.keywordResults?.topScores?.[0] || 'N/A';
+        const duration = details.durationMs ? `${(details.durationMs / 1000).toFixed(2)}s` : 'unknown';
+        return `✅ Search completed in ${duration}. Found ${vectorCount} documents via semantic search (best score: ${vectorTopScore}) and ${keywordCount} via keyword matching (best score: ${keywordTopScore}).`;
+      
+      case 'HYBRID_SCORING':
+        const total = details.totalResults || 0;
+        const unique = details.uniqueResults || 0;
+        const duplicates = total - unique;
+        const alpha = details.alpha || 0.7;
+        return `⚖️ Combined results using ${Math.round(alpha * 100)}% semantic + ${Math.round((1 - alpha) * 100)}% keyword weighting. Found ${total} total matches, removed ${duplicates} duplicates, keeping ${unique} unique documents.`;
+      
+      case 'RELEVANCE_FILTERING':
+        const beforeFilter = details.beforeFiltering || 0;
+        const afterFilter = details.afterFiltering || 0;
+        const threshold = details.threshold || 0;
+        const removed = beforeFilter - afterFilter;
+        return `🔬 Applied relevance filter (threshold: ${threshold}). Removed ${removed} low-quality matches, keeping ${afterFilter} highly relevant documents.`;
+      
+      case 'CONTEXT_PREPARATION':
+        const topResults = details.topResults || 0;
+        const totalChars = details.totalCharacters || 0;
+        const avgScore = details.averageScore || 0;
+        return `📚 Prepared context from top ${topResults} documents (${totalChars.toLocaleString()} characters total, avg. relevance: ${avgScore.toFixed(3)}) for AI response generation.`;
+      
+      case 'LLM_GENERATION_START':
+        const model = details.model || 'unknown';
+        const temp = details.temperature || 0;
+        return `🤖 Generating response using ${model} (temperature: ${temp}). This creates a natural, context-aware answer based on the retrieved Ayurvedic knowledge.`;
+      
+      case 'RESPONSE_STREAMING':
+        const totalTime = details.totalDurationMs ? `${(details.totalDurationMs / 1000).toFixed(2)}s` : 'unknown';
+        return `✨ Response completed successfully! Total processing time: ${totalTime}`;
+      
+      case 'ERROR':
+        const error = details.error || 'Unknown error';
+        return `❌ Error occurred: ${error}`;
+      
+      default:
+        return `Processing step: ${phase}`;
+    }
+  }
+
+  log(phase: string, details: any) {
+    const timestamp = Date.now();
+    const elapsedMs = timestamp - this.startTime;
+    const narrative = this.formatNarrative(phase, details);
+    
+    const entry: LogEntry = {
+      step: ++this.stepCounter,
+      timestamp: new Date(timestamp).toISOString(),
+      phase,
+      elapsedMs,
+      elapsedSeconds: parseFloat((elapsedMs / 1000).toFixed(2)),
+      narrative,
+      details,
+      duration: elapsedMs
+    };
+
+    this.logEntries.push(entry);
+
+    // Also log to console for real-time monitoring with narrative
+    console.log(`\n[${entry.step}] ${phase} (${elapsedMs}ms):`);
+    console.log(narrative);
+  }
+
+  async saveLog() {
+    try {
+      const totalDuration = Date.now() - this.startTime;
+      const summary = {
+        // Human-readable summary at the top
+        summary: {
+          query: this.query,
+          queryTitle: this.queryTitle,
+          totalSteps: this.stepCounter,
+          totalDurationSeconds: parseFloat((totalDuration / 1000).toFixed(2)),
+          timestamp: new Date().toISOString(),
+          outcome: this.logEntries.some(e => e.phase === 'ERROR') ? 'ERROR' : 'SUCCESS'
+        },
+        
+        // Step-by-step narrative
+        narrative: this.logEntries.map(entry => ({
+          step: entry.step,
+          time: `${entry.elapsedSeconds}s`,
+          phase: entry.phase,
+          what_happened: entry.narrative
+        })),
+        
+        // Technical details for debugging
+        technicalLog: this.logEntries
+      };
+
+      fs.writeFileSync(this.logFilePath, JSON.stringify(summary, null, 2), 'utf-8');
+      console.log(`\n✅ Debug log saved: ${this.logFilePath}`);
+      
+      return this.logFilePath;
+    } catch (error) {
+      console.error('❌ Failed to save debug log:', error);
+      return null;
+    }
+  }
+
+  getLogFilePath(): string {
+    return this.logFilePath;
+  }
+}
+
+// ============================================================================
 // HYBRID RAG CONFIGURATION
 // ============================================================================
 
@@ -76,6 +277,94 @@ try {
 } catch (error) {
   console.error('⚠️ Failed to initialize Pinecone, will use local-only mode:', error);
   isPineconeAvailable = false;
+}
+
+// ============================================================================
+// INITIALIZATION LOGGER
+// ============================================================================
+function createInitializationLog(datasetCount: number, datasetNames: string[]) {
+  try {
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-').split('T')[0] + '_' + 
+                      new Date().toISOString().replace(/[:.]/g, '-').split('T')[1].substring(0, 8);
+    const logsDir = path.join(process.cwd(), 'logs', 'hybrid-rag-queries');
+    
+    if (!fs.existsSync(logsDir)) {
+      fs.mkdirSync(logsDir, { recursive: true });
+    }
+    
+    const logFilePath = path.join(logsDir, `${timestamp}_init.json`);
+    
+    const initLog = {
+      summary: {
+        event: 'HYBRID_RAG_INITIALIZATION',
+        timestamp: new Date().toISOString(),
+        status: isPineconeAvailable ? 'READY' : 'FALLBACK_MODE'
+      },
+      
+      narrative: [
+        {
+          step: 1,
+          what_happened: isPineconeAvailable 
+            ? '✅ Hybrid RAG system successfully initialized with Pinecone vector database connection'
+            : '⚠️ Hybrid RAG system initialized in fallback mode (Pinecone unavailable, using local data only)'
+        },
+        {
+          step: 2,
+          what_happened: datasetCount > 0
+            ? `📚 Loaded ${datasetCount} local knowledge bases: ${datasetNames.join(', ')}`
+            : '⚠️ No local knowledge bases loaded'
+        },
+        {
+          step: 3,
+          what_happened: isPineconeAvailable
+            ? `🔗 Connected to Pinecone index: "${PINECONE_CONFIG.indexName}" with embedding model: text-embedding-3-small`
+            : '💾 Operating with local embeddings and BM25 keyword search only'
+        },
+        {
+          step: 4,
+          what_happened: `⚙️ Hybrid search configured with ${Math.round(HYBRID_ALPHA * 100)}% semantic weight and ${Math.round((1 - HYBRID_ALPHA) * 100)}% keyword weight`
+        },
+        {
+          step: 5,
+          what_happened: '🎯 Query classification, expansion, and namespace targeting features enabled'
+        },
+        {
+          step: 6,
+          what_happened: '✨ System ready to process Ayurvedic medicine queries with advanced RAG pipeline'
+        }
+      ],
+      
+      technicalDetails: {
+        pinecone: {
+          available: isPineconeAvailable,
+          indexName: PINECONE_CONFIG.indexName,
+          environment: PINECONE_CONFIG.environment,
+          embeddingModel: 'text-embedding-3-small'
+        },
+        localDatasets: {
+          count: datasetCount,
+          names: datasetNames
+        },
+        configuration: {
+          hybridAlpha: HYBRID_ALPHA,
+          topK: 8,
+          queryExpansionEnabled: ENABLE_QUERY_EXPANSION,
+          queryClassificationEnabled: true,
+          namespaceTargetingEnabled: true,
+          useHybridScoring: USE_HYBRID_SCORING
+        },
+        timestamp: new Date().toISOString()
+      }
+    };
+    
+    fs.writeFileSync(logFilePath, JSON.stringify(initLog, null, 2), 'utf-8');
+    console.log(`\n📝 Initialization log created: ${logFilePath}`);
+    
+    return logFilePath;
+  } catch (error) {
+    console.error('❌ Failed to create initialization log:', error);
+    return null;
+  }
 }
 
 // ============================================================================
@@ -228,11 +517,19 @@ try {
 
   if (loadedDatasets.length > 0) {
     localLoader = new HybridAyurvedicRAGLoader(loadedDatasets);
+    
+    // Create initialization log after system is ready
+    createInitializationLog(
+      loadedDatasets.length,
+      loadedDatasets.map(d => d.name)
+    );
   } else {
     console.error('❌ No local datasets found, local search will be unavailable');
+    createInitializationLog(0, []);
   }
 } catch (error) {
   console.error('❌ Failed to load local datasets:', error);
+  createInitializationLog(0, []);
 }
 
 // ============================================================================
@@ -451,6 +748,7 @@ export async function POST(req: NextRequest) {
   let keywordResults: DocumentWithScore[] = [];
   let queryExpansions = 1;
   let namespacesSearched: string[] = [];
+  let logger: QueryDebugLogger | null = null;
 
   try {
     const { messages } = await req.json();
@@ -460,17 +758,44 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'No question provided' }, { status: 400 });
     }
 
+    // Initialize debug logger
+    logger = new QueryDebugLogger(userQuestion);
+
     console.log(`\n${'='.repeat(80)}`);
     console.log(`🔍 HYBRID RAG QUERY: "${userQuestion}"`);
     console.log(`${'='.repeat(80)}\n`);
 
+    logger.log('REQUEST_RECEIVED', {
+      query: userQuestion,
+      messageCount: messages.length,
+      configuration: {
+        useHybridScoring: USE_HYBRID_SCORING,
+        hybridAlpha: HYBRID_ALPHA,
+        enableQueryExpansion: ENABLE_QUERY_EXPANSION,
+        maxQueryExpansions: MAX_QUERY_EXPANSIONS
+      },
+      availability: {
+        pinecone: isPineconeAvailable,
+        localDatasets: localLoader !== null
+      }
+    });
+
     // Step 1: Query Classification
+    const classificationStart = Date.now();
     const recommendedDatasets = QueryClassifier.getRecommendedDatasets(userQuestion);
     const intents = QueryClassifier.classifyIntent(userQuestion);
+    const classificationDuration = Date.now() - classificationStart;
     
     console.log(`📋 Query Classification:`);
     console.log(`   - Intents: ${intents.join(', ')}`);
     console.log(`   - Recommended datasets: ${recommendedDatasets.join(', ')}`);
+
+    logger.log('QUERY_CLASSIFICATION', {
+      intents,
+      recommendedDatasets,
+      classificationDuration,
+      method: 'QueryClassifier.classifyIntent() + getRecommendedDatasets()'
+    });
 
     // Map datasets to Pinecone namespaces
     const allNamespaces = ['', 'skin-diseases', 'skin-diseases-tables', 'mental-disorders', 'mental-disorders-tables'];
@@ -486,7 +811,15 @@ export async function POST(req: NextRequest) {
     namespacesSearched = targetNamespaces;
     console.log(`🎯 Target namespaces: ${targetNamespaces.join(', ') || 'default'}`);
 
+    logger.log('NAMESPACE_TARGETING', {
+      allNamespaces,
+      targetNamespaces,
+      reduction: `${allNamespaces.length} → ${targetNamespaces.length}`,
+      costSavings: `${((1 - targetNamespaces.length / allNamespaces.length) * 100).toFixed(0)}%`
+    });
+
     // Step 2: Query Expansion
+    const expansionStart = Date.now();
     let queryVariants = [userQuestion];
     if (ENABLE_QUERY_EXPANSION) {
       const expanded = QueryExpander.expandQuery(userQuestion);
@@ -494,9 +827,37 @@ export async function POST(req: NextRequest) {
       queryExpansions = queryVariants.length;
       console.log(`📝 Query expansion: ${queryExpansions} variants`);
     }
+    const expansionDuration = Date.now() - expansionStart;
+
+    logger.log('QUERY_EXPANSION', {
+      enabled: ENABLE_QUERY_EXPANSION,
+      originalQuery: userQuestion,
+      expandedQueries: queryVariants,
+      variantCount: queryExpansions,
+      expansionDuration,
+      method: 'QueryExpander.expandQuery()'
+    });
 
     // Step 3: Parallel Search - Vector + Keyword
+    logger.log('SEARCH_INITIATION', {
+      vectorSearchEnabled: isPineconeAvailable,
+      keywordSearchEnabled: localLoader !== null,
+      parallelSearches: 2,
+      vectorConfig: isPineconeAvailable ? {
+        index: PINECONE_CONFIG.indexName,
+        namespaces: targetNamespaces,
+        queryVariants: queryVariants.length,
+        maxChunksPerVariant: 6
+      } : null,
+      keywordConfig: localLoader ? {
+        datasets: recommendedDatasets,
+        maxChunks: 10,
+        algorithm: 'BM25'
+      } : null
+    });
+
     const searchPromises: Promise<DocumentWithScore[]>[] = [];
+    const searchStart = Date.now();
 
     // Vector search (Pinecone)
     if (isPineconeAvailable) {
@@ -520,8 +881,25 @@ export async function POST(req: NextRequest) {
 
     // Wait for both searches
     [vectorResults, keywordResults] = await Promise.all(searchPromises);
+    const searchDuration = Date.now() - searchStart;
+
+    logger.log('SEARCH_COMPLETED', {
+      searchDuration,
+      vectorResults: {
+        count: vectorResults.length,
+        topScores: vectorResults.slice(0, 3).map(r => r.score.toFixed(4)),
+        sources: vectorResults.map(r => r.namespace).filter(Boolean)
+      },
+      keywordResults: {
+        count: keywordResults.length,
+        topScores: keywordResults.slice(0, 3).map(r => r.score.toFixed(4)),
+        sources: keywordResults.map(r => r.source)
+      },
+      totalResultsFound: vectorResults.length + keywordResults.length
+    });
 
     // Step 4: Determine RAG mode and combine results
+    const hybridScoringStart = Date.now();
     let finalResults: DocumentWithScore[];
 
     if (vectorResults.length > 0 && keywordResults.length > 0 && USE_HYBRID_SCORING) {
@@ -529,19 +907,57 @@ export async function POST(req: NextRequest) {
       ragMode = 'hybrid';
       console.log(`\n🎯 Mode: HYBRID (${vectorResults.length} vector + ${keywordResults.length} keyword)`);
       finalResults = hybridScore(vectorResults, keywordResults, HYBRID_ALPHA);
+      
+      logger.log('HYBRID_SCORING', {
+        mode: 'hybrid',
+        hybridAlpha: HYBRID_ALPHA,
+        vectorWeight: `${(HYBRID_ALPHA * 100).toFixed(0)}%`,
+        keywordWeight: `${((1 - HYBRID_ALPHA) * 100).toFixed(0)}%`,
+        inputResults: {
+          vector: vectorResults.length,
+          keyword: keywordResults.length
+        },
+        outputResults: finalResults.length,
+        deduplication: `${vectorResults.length + keywordResults.length} → ${finalResults.length}`,
+        hybridMatches: finalResults.filter(r => r.source === 'hybrid').length,
+        scoringDuration: Date.now() - hybridScoringStart
+      });
     } else if (vectorResults.length > 0) {
       // Vector-only mode
       ragMode = 'vector-only';
       console.log(`\n📊 Mode: VECTOR-ONLY (${vectorResults.length} results)`);
       finalResults = vectorResults.sort((a, b) => b.score - a.score);
+      
+      logger.log('MODE_SELECTION', {
+        mode: 'vector-only',
+        reason: keywordResults.length === 0 ? 'No keyword results' : 'Hybrid scoring disabled',
+        resultCount: vectorResults.length
+      });
     } else if (keywordResults.length > 0) {
       // Local-only fallback
       ragMode = 'local-only';
       console.log(`\n📚 Mode: LOCAL-ONLY (${keywordResults.length} results)`);
       finalResults = keywordResults;
+      
+      logger.log('MODE_SELECTION', {
+        mode: 'local-only',
+        reason: 'No vector results (Pinecone unavailable or no matches)',
+        resultCount: keywordResults.length,
+        fallback: true
+      });
     } else {
       // No results from any source
       console.log('\n⚠️ No results from any search method');
+      
+      logger.log('NO_RESULTS', {
+        mode: 'no-results',
+        vectorAvailable: isPineconeAvailable,
+        keywordAvailable: localLoader !== null,
+        reason: 'No matches from any search method'
+      });
+
+      await logger.saveLog();
+
       return NextResponse.json({
         message: "I don't have specific information about this topic in my current knowledge base. Please consult with a qualified Ayurvedic practitioner for personalized guidance.",
         query: userQuestion,
@@ -551,18 +967,48 @@ export async function POST(req: NextRequest) {
     }
 
     // Step 5: Filter by relevance
+    const filteringStart = Date.now();
     const relevantResults = finalResults.filter(result =>
       result.score > 0.1 && // Minimum threshold
       RelevanceFilter.isRelevant(userQuestion, result.chunk.text, result.score)
     );
+    const filteringDuration = Date.now() - filteringStart;
 
     console.log(`\n📊 Results Summary:`);
     console.log(`   - Vector results: ${vectorResults.length}`);
     console.log(`   - Keyword results: ${keywordResults.length}`);
     console.log(`   - Combined/filtered: ${finalResults.length} → ${relevantResults.length}`);
 
+    logger.log('RELEVANCE_FILTERING', {
+      filteringDuration,
+      inputResults: finalResults.length,
+      outputResults: relevantResults.length,
+      filtered: finalResults.length - relevantResults.length,
+      minimumThreshold: 0.1,
+      filterMethod: 'RelevanceFilter.isRelevant()',
+      topScores: relevantResults.slice(0, 5).map(r => ({
+        score: r.score.toFixed(4),
+        source: r.source,
+        preview: r.chunk.text.substring(0, 100)
+      }))
+    });
+
     // Step 6: Format context with citations
     const topResults = relevantResults.slice(0, 10);
+    
+    logger.log('CONTEXT_PREPARATION', {
+      selectedResults: topResults.length,
+      maxResults: 10,
+      results: topResults.map((r, idx) => ({
+        rank: idx + 1,
+        score: r.score.toFixed(4),
+        source: r.source,
+        namespace: r.namespace || 'default',
+        page: r.chunk.page || r.metadata?.page_number,
+        textLength: r.chunk.text.length,
+        preview: r.chunk.text.substring(0, 150) + '...'
+      }))
+    });
     const contextWithCitations = topResults.map((result, index) => {
       const namespace = result.namespace || 'default';
       const page = result.chunk.page || result.metadata?.page_number || 'N/A';
@@ -595,6 +1041,17 @@ ${result.chunk.text}
     }
 
     // Step 7: Generate response with LLM
+    const llmStart = Date.now();
+    
+    logger.log('LLM_GENERATION_START', {
+      model: 'gpt-4o-mini',
+      temperature: 0.3,
+      streaming: true,
+      contextLength: contextWithCitations.length,
+      documentCount: topResults.length,
+      promptTemplate: 'Hybrid RAG with citation instructions'
+    });
+
     const chatModel = new ChatOpenAI({
       modelName: 'gpt-4o-mini',
       temperature: 0.3,
@@ -620,6 +1077,24 @@ ${result.chunk.text}
     console.log(`⏱️  Total processing time: ${totalTime}ms`);
     console.log(`${'='.repeat(80)}\n`);
 
+    logger.log('RESPONSE_STREAMING', {
+      llmSetupDuration: Date.now() - llmStart,
+      totalProcessingTime: totalTime,
+      streamingStarted: true,
+      responseHeaders: {
+        'X-RAG-Mode': ragMode,
+        'X-Vector-Results': vectorResults.length,
+        'X-Local-Results': keywordResults.length,
+        'X-Hybrid-Alpha': HYBRID_ALPHA,
+        'X-Query-Expansions': queryExpansions,
+        'X-Namespaces-Searched': namespacesSearched.join(','),
+        'X-Processing-Time-Ms': totalTime
+      }
+    });
+
+    // Save log asynchronously (don't block response)
+    logger.saveLog().catch(err => console.error('Failed to save log:', err));
+
     // Return streaming response with debug headers
     return new StreamingTextResponse(
       stream.pipeThrough(createStreamDataTransformer()),
@@ -642,6 +1117,24 @@ ${result.chunk.text}
 
   } catch (error) {
     console.error('❌ Error in Hybrid RAG endpoint:', error);
+    
+    // Log error details
+    if (logger) {
+      logger.log('ERROR', {
+        errorType: error instanceof Error ? error.constructor.name : typeof error,
+        errorMessage: error instanceof Error ? error.message : String(error),
+        errorStack: error instanceof Error ? error.stack : undefined,
+        ragMode,
+        vectorResults: vectorResults.length,
+        keywordResults: keywordResults.length,
+        queryExpansions,
+        namespacesSearched,
+        totalDuration: Date.now() - startTime
+      });
+      
+      // Save error log
+      await logger.saveLog().catch(err => console.error('Failed to save error log:', err));
+    }
     
     // Graceful error handling
     if (error instanceof Error) {
