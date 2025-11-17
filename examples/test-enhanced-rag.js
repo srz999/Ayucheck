@@ -4,6 +4,9 @@
  * Simple script to test the enhanced RAG endpoint with various queries
  */
 
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+
 const API_URL = 'http://localhost:3000/api/ayurveda-enhanced';
 
 // Test queries covering different domains
@@ -185,9 +188,15 @@ async function runTests() {
   console.log(`   📊 Success Rate: ${(passed / testQueries.length * 100).toFixed(1)}%\n`);
 }
 
-// Run tests if executed directly
-if (require.main === module) {
+// Run tests if executed directly (ES module compatible)
+// In ES modules, check if this file is the entry point
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+// Check if this is the main module being run
+if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
   runTests().catch(console.error);
 }
 
-module.exports = { testHealthCheck, testQuery, runTests };
+// ES module exports
+export { testHealthCheck, testQuery, runTests };
