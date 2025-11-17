@@ -44,23 +44,41 @@ const embeddings = new OpenAIEmbeddings({
 let isDataLoaded = false;
 
 async function initializePineconeIndex(): Promise<void> {
-  if (isDataLoaded) return;
+  if (isDataLoaded) {
+    console.log('✅ Data already loaded, skipping initialization');
+    return;
+  }
 
+  const startTime = Date.now();
   try {
-    console.log('🔄 Initializing Pinecone index with Ayurvedic data...');
+    console.log('🔄 [INIT] Starting Pinecone index initialization...');
+    console.log('🔄 [INIT] Config:', {
+      indexName: PINECONE_CONFIG.indexName,
+      dimension: PINECONE_CONFIG.dimension,
+      apiKeyPresent: !!PINECONE_CONFIG.apiKey,
+    });
     
     const index = pc.index(PINECONE_CONFIG.indexName);
+    console.log('🔄 [INIT] Index object created');
     
     // Check if index already has data
     try {
+      console.log('🔄 [INIT] Checking index stats...');
+      const statsStartTime = Date.now();
       const stats = await index.describeIndexStats();
+      console.log(`🔄 [INIT] Index stats retrieved in ${Date.now() - statsStartTime}ms:`, {
+        totalRecordCount: stats.totalRecordCount,
+        namespaces: stats.namespaces ? Object.keys(stats.namespaces) : [],
+      });
+      
       if (stats.totalRecordCount && stats.totalRecordCount > 0) {
-        console.log(`✅ Index '${PINECONE_CONFIG.indexName}' already has ${stats.totalRecordCount} vectors`);
+        console.log(`✅ [INIT] Index '${PINECONE_CONFIG.indexName}' already has ${stats.totalRecordCount} vectors (${Date.now() - startTime}ms)`);
         isDataLoaded = true;
         return;
       }
     } catch (error) {
-      console.log('📝 Index not found or empty, will populate...');
+      console.error('❌ [INIT] Error checking index stats:', error instanceof Error ? error.message : error);
+      console.log('📝 [INIT] Will attempt to populate index...');
     }
 
     // Load Ayurvedic RAG data from JSONL format
@@ -130,9 +148,11 @@ async function initializePineconeIndex(): Promise<void> {
     });
 
     // Generate embeddings for all documents
-    console.log(`🧠 Generating embeddings for ${documents.length} documents...`);
+    console.log(`🧠 [INIT] Generating embeddings for ${documents.length} documents...`);
+    const embeddingStartTime = Date.now();
     const texts = documents.map(doc => doc.pageContent);
     const documentEmbeddings = await embeddings.embedDocuments(texts);
+    console.log(`✅ [INIT] Embeddings generated in ${Date.now() - embeddingStartTime}ms`);
 
     // Prepare vectors for Pinecone
     const vectors = documents.map((doc, i) => ({
@@ -143,89 +163,166 @@ async function initializePineconeIndex(): Promise<void> {
         ...doc.metadata,
       },
     }));
+    console.log(`✅ [INIT] Prepared ${vectors.length} vectors for upload`);
 
     // Upload vectors to Pinecone in batches
     const batchSize = 100; // Pinecone supports larger batches than Qdrant
-    console.log(`📤 Uploading ${vectors.length} vectors to Pinecone in batches of ${batchSize}...`);
+    console.log(`📤 [INIT] Uploading ${vectors.length} vectors to Pinecone in batches of ${batchSize}...`);
     
     for (let i = 0; i < vectors.length; i += batchSize) {
       const batch = vectors.slice(i, i + batchSize);
-      console.log(`📤 Uploading batch ${Math.floor(i / batchSize) + 1}/${Math.ceil(vectors.length / batchSize)} with ${batch.length} vectors...`);
+      const batchNum = Math.floor(i / batchSize) + 1;
+      const totalBatches = Math.ceil(vectors.length / batchSize);
+      console.log(`📤 [INIT] Uploading batch ${batchNum}/${totalBatches} (${batch.length} vectors)...`);
       
+      const batchStartTime = Date.now();
       await index.upsert(batch);
-      console.log(`✅ Batch ${Math.floor(i / batchSize) + 1} uploaded successfully`);
+      console.log(`✅ [INIT] Batch ${batchNum} uploaded in ${Date.now() - batchStartTime}ms`);
     }
 
-    console.log('✅ Pinecone index initialized successfully with Ayurvedic data');
+    console.log(`✅ [INIT] Pinecone index initialized successfully with Ayurvedic data (total: ${Date.now() - startTime}ms)`);
     isDataLoaded = true;
   } catch (error) {
-    console.error('❌ Error initializing Pinecone index:', error);
+    console.error('❌ [INIT] Error initializing Pinecone index:', {
+      error: error instanceof Error ? error.message : error,
+      stack: error instanceof Error ? error.stack : undefined,
+      elapsed: `${Date.now() - startTime}ms`,
+    });
     throw new Error(`Failed to initialize Pinecone index: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
 }
 
 // Advanced RAG prompt template for Ayurvedic medicine with citation instructions
 const ragPromptTemplate = PromptTemplate.fromTemplate(`
-You are an expert Ayurvedic medicine consultant with deep knowledge of traditional Indian medicine practices. You have access to authoritative Ayurvedic texts and pharmacopoeia data through a cloud vector database powered by Pinecone.
+You are an expert Ayurvedic medicine consultant with deep knowledge of classical Indian medicine.
+You are connected to an authoritative Ayurvedic knowledge base sourced from verified Ayurvedic Pharmacopoeia texts, stored in a vector database powered by Pinecone.
 
-Context from Ayurvedic Knowledge Base (with citation metadata):
+You are also a linguistic text normalization expert. Before responding, inspect and correct any corrupted Sanskrit transliteration characters (e.g., ¤, ¡, £, ¸, ·, ¢) into proper Romanized Sanskrit (IAST or simplified Latin) while preserving the meaning and formatting.
+Do not modify English text, numbers, or citations.
+
+Retrieved Context (with citation metadata):
 {context}
 
-User Question: {question}
+User Question:
+{question}
 
-CRITICAL CITATION RULES:
-1. **Every factual claim MUST include an inline citation** in this exact format:
-   【Ayurvedic Pharmacopoeia Vol-1†[herb_name]†Page [page_number]】
+ Response Generation Rules
+Grounding:
 
-2. **What to cite:**
-   - Herbal properties or benefits
-   - Therapeutic uses or indications
-   - Dosage recommendations
-   - Contraindications or side effects
-   - Traditional Ayurvedic knowledge
-   - Specific formulations or preparations
+Answer strictly using the information from the above context.
 
-3. **Citation placement:**
-   - Place immediately after the relevant sentence or paragraph
-   - Group related facts from the same source under one citation
-   - If discussing multiple herbs, cite each separately
+Do not infer or add facts beyond what is retrieved.
 
-4. **When information is unavailable:**
-   - State: "The retrieved Ayurvedic texts do not contain specific information about [topic]."
-   - Recommend consulting a qualified Ayurvedic practitioner
+If no relevant data is found, respond exactly with:
 
-Instructions:
-- Provide accurate, evidence-based Ayurvedic guidance with citations
-- Reference specific herbs, formulations, or practices from the context
-- Include dosha considerations (Vata, Pitta, Kapha) when relevant
-- Mention botanical names when discussing herbs
-- Include usage instructions, dosages, and contraindications with citations
-- Always emphasize consulting qualified Ayurvedic practitioners for personalized treatment
-- If the context doesn't contain relevant information, state this clearly
-- Maintain traditional Ayurvedic terminology while being accessible to modern readers
+“The retrieved Ayurvedic texts do not contain specific information about [topic]. Please consult a qualified Ayurvedic practitioner for accurate guidance.”
 
-Answer with citations:
+Sanskrit Normalization:
+
+Fix transliteration errors such as:
+
+Am¤t¡riÀa → Amritarisha
+
+C£r¸a → Churna
+
+Gu·£c¢ → Guduchi
+
+Kv¡tha → Kwath
+
+Retain citations and English words unchanged.
+
+Citation Rules:
+
+Every factual statement must include inline citations in this format:
+【Ayurvedic Pharmacopoeia Vol-1†[herb_name]†Page [page_number]】.
+
+Group related data (e.g., formulations and therapeutic uses) under the same citation if they share a source.
+
+Output Structure & Formatting (Critical for Clarity):
+Always format the final response in this professional structure:
+
+ Introduction:
+A concise one-line summary restating the user’s condition or query.
+
+ Findings (Evidence-Based Ayurvedic Information):
+
+Provide clearly formatted explanations of relevant formulations or herbs.
+
+Use bullet points or bold for formulations.
+
+Present Ayurvedic names with correct transliteration and citations.
+
+If applicable, include dosha relevance (Vata, Pitta, Kapha).
+
+Example format:
+
+Formulations for Jvara (Fever):
+
+Amritarisha — used in managing Jvara and associated conditions【Ayurvedic Pharmacopoeia Vol-1†Page 66】.
+
+Guduchi Sattva — beneficial for Prameha and Kamala【Ayurvedic Pharmacopoeia Vol-1†Page 66】.
+
+ Recommended Dosage:
+
+Specify the dosage clearly with units and preparation method (powder, decoction, etc.).
+
+Example:
+
+Powder (Churna): 3–6 g per dose
+
+Decoction (Kwatha): 20–30 g per dose【Ayurvedic Pharmacopoeia Vol-1†Page 66】
+
+Contraindications / Notes (if available):
+
+Include only if explicitly present in the context.
+
+If not found, omit this section.
+
+ Disclaimer:
+Always end with:
+
+“Please consult a certified Ayurvedic practitioner before using any medicinal formulations.”
+
+Tone & Style:
+
+Maintain a professional, evidence-based tone similar to an Ayurvedic clinical handbook.
+
+Avoid casual expressions, assumptions, or speculative claims.
+
+Keep paragraphs compact and logically ordered.
 `);
 
 export async function POST(req: NextRequest) {
+  const requestStartTime = Date.now();
   try {
+    console.log('🚀 [POST] Request received at', new Date().toISOString());
+    
     // Initialize Pinecone index with data (if not already done)
+    console.log('🔄 [POST] Initializing Pinecone index...');
+    const initStartTime = Date.now();
     await initializePineconeIndex();
+    console.log(`✅ [POST] Index initialization completed in ${Date.now() - initStartTime}ms`);
 
     const { messages } = await req.json();
     const userQuestion = messages[messages.length - 1]?.content || '';
 
     if (!userQuestion) {
+      console.warn('⚠️ [POST] No question provided in request');
       return NextResponse.json({ error: 'No question provided' }, { status: 400 });
     }
 
-    console.log(`🔍 Processing Ayurvedic query via Pinecone: "${userQuestion}"`);
+    console.log(`🔍 [POST] Processing query: "${userQuestion.substring(0, 100)}${userQuestion.length > 100 ? '...' : ''}"`);
 
     // Generate embedding for user query
+    console.log('🧠 [POST] Generating query embedding...');
+    const embeddingStartTime = Date.now();
     const queryEmbedding = await embeddings.embedQuery(userQuestion);
+    console.log(`✅ [POST] Query embedding generated in ${Date.now() - embeddingStartTime}ms (dimension: ${queryEmbedding.length})`);
 
     // Get Pinecone index
+    console.log('🔄 [POST] Getting Pinecone index...');
     const index = pc.index(PINECONE_CONFIG.indexName);
+    console.log('✅ [POST] Index object retrieved');
 
     // Define all namespaces to search
     const namespaces = [
@@ -236,11 +333,14 @@ export async function POST(req: NextRequest) {
       'mental-disorders-tables',
     ];
 
-    console.log(`🔍 Searching across ${namespaces.length} namespaces...`);
+    console.log(`🔍 [POST] Searching across ${namespaces.length} namespaces:`, namespaces);
 
     // Search all namespaces in parallel
+    const searchStartTime = Date.now();
     const searchPromises = namespaces.map(async (ns) => {
+      const nsStartTime = Date.now();
       try {
+        console.log(`🔍 [SEARCH] Querying namespace: "${ns || 'default'}"`);
         const nsQuery = index.namespace(ns);
         const response = await nsQuery.query({
           vector: queryEmbedding,
@@ -248,6 +348,8 @@ export async function POST(req: NextRequest) {
           includeValues: false,
           includeMetadata: true,
         });
+        
+        console.log(`✅ [SEARCH] Namespace "${ns || 'default'}" returned ${response.matches?.length || 0} matches in ${Date.now() - nsStartTime}ms`);
         
         // Tag matches with namespace for debugging
         if (response.matches) {
@@ -260,13 +362,18 @@ export async function POST(req: NextRequest) {
         
         return response.matches || [];
       } catch (error) {
-        console.error(`❌ Error searching namespace "${ns}":`, error);
+        console.error(`❌ [SEARCH] Error searching namespace "${ns}":`, {
+          error: error instanceof Error ? error.message : error,
+          elapsed: `${Date.now() - nsStartTime}ms`,
+        });
         return [];
       }
     });
 
     // Wait for all searches to complete
+    console.log('⏳ [SEARCH] Waiting for all namespace queries to complete...');
     const allMatches = (await Promise.all(searchPromises)).flat();
+    console.log(`✅ [SEARCH] All searches completed in ${Date.now() - searchStartTime}ms (${allMatches.length} total matches)`);
 
     // Sort all matches by score (highest first)
     allMatches.sort((a, b) => (b.score || 0) - (a.score || 0));
@@ -378,11 +485,14 @@ ${doc.pageContent}
     ]);
 
     // Execute the chain and stream the response
+    console.log('🔄 [POST] Executing RAG chain...');
+    const chainStartTime = Date.now();
     const stream = await ragChain.stream({
       question: userQuestion,
     });
+    console.log(`✅ [POST] RAG chain started in ${Date.now() - chainStartTime}ms`);
 
-    console.log('✅ Streaming Ayurvedic response powered by Pinecone vector search');
+    console.log(`✅ [POST] Streaming response (total request time: ${Date.now() - requestStartTime}ms)`);
 
     // Return streaming response
     return new StreamingTextResponse(
@@ -393,16 +503,22 @@ ${doc.pageContent}
           'X-Vector-DB': 'Pinecone',
           'X-Documents-Found': relevantDocs.length.toString(),
           'X-Index-Name': PINECONE_CONFIG.indexName,
+          'X-Request-Time-Ms': (Date.now() - requestStartTime).toString(),
         },
       }
     );
 
   } catch (error) {
-    console.error('❌ Error in Pinecone-powered Ayurvedic RAG endpoint:', error);
+    console.error('❌ [POST] Error in Pinecone-powered Ayurvedic RAG endpoint:', {
+      error: error instanceof Error ? error.message : error,
+      stack: error instanceof Error ? error.stack : undefined,
+      elapsed: `${Date.now() - requestStartTime}ms`,
+    });
     
     // Handle specific Pinecone errors
     if (error instanceof Error) {
       if (error.message.includes('API key')) {
+        console.error('❌ [POST] API key error detected');
         return NextResponse.json({
           error: 'Pinecone API key is missing or invalid',
           details: 'Please set PINECONE_API_KEY in your environment variables',
@@ -410,39 +526,70 @@ ${doc.pageContent}
       }
       
       if (error.message.includes('Index not found')) {
+        console.error('❌ [POST] Index not found error detected');
         return NextResponse.json({
           error: 'Pinecone index not found',
           details: `Index '${PINECONE_CONFIG.indexName}' does not exist. Please create it in Pinecone console.`,
         }, { status: 404 });
+      }
+
+      if (error.message.includes('timeout') || error.message.includes('ETIMEDOUT')) {
+        console.error('❌ [POST] Timeout error detected');
+        return NextResponse.json({
+          error: 'Request timeout',
+          details: 'Pinecone request timed out. This may be due to network issues or large data uploads.',
+        }, { status: 504 });
       }
     }
 
     return NextResponse.json({
       error: 'Internal server error in Pinecone RAG processing',
       details: error instanceof Error ? error.message : 'Unknown error',
+      requestTime: `${Date.now() - requestStartTime}ms`,
     }, { status: 500 });
   }
 }
 
 // Health check endpoint
 export async function GET(req: NextRequest) {
+  const startTime = Date.now();
   try {
-    const index = pc.index(PINECONE_CONFIG.indexName);
-    const stats = await index.describeIndexStats();
+    console.log('🏥 [GET] Health check started');
     
-    return NextResponse.json({
+    const index = pc.index(PINECONE_CONFIG.indexName);
+    console.log('🏥 [GET] Index object retrieved');
+    
+    const statsStartTime = Date.now();
+    const stats = await index.describeIndexStats();
+    console.log(`🏥 [GET] Stats retrieved in ${Date.now() - statsStartTime}ms`);
+    
+    const response = {
       status: 'healthy',
       vectorDatabase: 'Pinecone',
       indexName: PINECONE_CONFIG.indexName,
       vectorCount: stats.totalRecordCount || 0,
       dimension: PINECONE_CONFIG.dimension,
+      namespaces: stats.namespaces ? Object.keys(stats.namespaces) : [],
+      dataLoaded: isDataLoaded,
+      responseTime: `${Date.now() - startTime}ms`,
       timestamp: new Date().toISOString(),
-    });
+    };
+    
+    console.log('✅ [GET] Health check completed:', response);
+    return NextResponse.json(response);
   } catch (error) {
+    console.error('❌ [GET] Health check failed:', {
+      error: error instanceof Error ? error.message : error,
+      stack: error instanceof Error ? error.stack : undefined,
+      elapsed: `${Date.now() - startTime}ms`,
+    });
+    
     return NextResponse.json({
       status: 'unhealthy',
       error: error instanceof Error ? error.message : 'Unknown error',
       indexName: PINECONE_CONFIG.indexName,
+      dataLoaded: isDataLoaded,
+      responseTime: `${Date.now() - startTime}ms`,
       timestamp: new Date().toISOString(),
     }, { status: 503 });
   }
