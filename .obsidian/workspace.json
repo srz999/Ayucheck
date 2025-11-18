@@ -1,0 +1,184 @@
+{
+  "main": {
+    "id": "c497e5499eca827d",
+    "type": "split",
+    "children": [
+      {
+        "id": "5e130cb94e4a11a5",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "d1b8f9cb1d930fc2",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "enhanced-rag-flowchart.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "enhanced-rag-flowchart"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "29f1a1f60534e948",
+    "type": "split",
+    "children": [
+      {
+        "id": "d83cd4ade454d738",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "094423f6205a0ed2",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false
+              },
+              "icon": "lucide-folder-closed",
+              "title": "Files"
+            }
+          },
+          {
+            "id": "9534aaa5b309daff",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "Search"
+            }
+          },
+          {
+            "id": "67a3d77aa137036f",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "Bookmarks"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "25816cafeec28dc2",
+    "type": "split",
+    "children": [
+      {
+        "id": "06ef8b5b4c4edb6b",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "f76c6c546328cebc",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "enhanced-rag-flowchart.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "Backlinks for enhanced-rag-flowchart"
+            }
+          },
+          {
+            "id": "ab2bc7c6a4d669de",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "enhanced-rag-flowchart.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "Outgoing links from enhanced-rag-flowchart"
+            }
+          },
+          {
+            "id": "741503a08df6d826",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "Tags"
+            }
+          },
+          {
+            "id": "fbdf438b881311b3",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "enhanced-rag-flowchart.md",
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "Outline of enhanced-rag-flowchart"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Open quick switcher": false,
+      "graph:Open graph view": false,
+      "canvas:Create new canvas": false,
+      "daily-notes:Open today's daily note": false,
+      "templates:Insert template": false,
+      "command-palette:Open command palette": false,
+      "bases:Create new base": false
+    }
+  },
+  "active": "d1b8f9cb1d930fc2",
+  "lastOpenFiles": [
+    "notes/detailed_rag_expert_review.md",
+    "BM25_IDF_QUICK_REFERENCE.md",
+    "BM25_IDF_VISUAL_COMPARISON.md",
+    "BM25_IDF_IMPROVEMENT.md",
+    "notes/rag_further_improvements.md",
+    "BM25_HYBRID_SEQUENCE_TRACE.md",
+    "HYBRID_RAG_ANALYSIS.md",
+    "enhancedrag_diff.md",
+    "enhanced-rag-flowchart.md"
+  ]
+}

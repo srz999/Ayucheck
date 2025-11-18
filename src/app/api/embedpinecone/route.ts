@@ -8,6 +8,7 @@ import { formatDocumentsAsString } from 'langchain/util/document';
 import { HttpResponseOutputParser } from 'langchain/output_parsers';
 import { Document } from 'langchain/document';
 import { type AyurvedaMetadata } from '../../../lib/vector-store';
+import { HybridSearch } from '../../../lib/rag-enhancements';
 import { Pinecone } from '@pinecone-database/pinecone';
 import fs from 'fs';
 import path from 'path';
@@ -281,13 +282,81 @@ export async function POST(req: NextRequest) {
       console.log(`   ${index + 1}. [${ns}] Score: ${match.score?.toFixed(4)} - ${content?.substring(0, 100)}...`);
     });
 
-    // Filter results by relevance threshold
-    const relevanceThreshold = 0.35; // Lowered from 0.7 to capture table data
-    const filteredMatches = topMatches.filter(match => (match.score || 0) >= relevanceThreshold) || [];
+    // Apply BM25 hybrid reranking to combine vector + keyword scores
+    console.log('🔄 Applying FULL BM25 hybrid reranking (with IDF)...');
+    
+    // HYBRID RAG APPROACH EXPLANATION:
+    // 1. VECTOR SEARCH (Pinecone): Semantic similarity using cosine distance on embeddings
+    // 2. KEYWORD SEARCH (Local BM25 with IDF): Full BM25 algorithm with:
+    //    - TF (Term Frequency): How often terms appear in document
+    //    - IDF (Inverse Document Frequency): Boosts rare terms, penalizes common terms
+    //    - Length Normalization: Adjusts for document length differences
+    // 3. HYBRID FUSION: Weighted combination of both scores for final ranking
+    //
+    // Why FULL BM25 with IDF matters:
+    // - Common words like "the", "and", "for" get low IDF scores (ignored)
+    // - Rare/specific terms like "turmeric", "ashwagandha" get high IDF scores (boosted)
+    // - Better precision: focuses on meaningful keywords, not just any keyword match
+    
+    // Create documents with proper structure for LOCAL BM25 keyword matching
+    // Note: BM25 is calculated locally, NOT by Pinecone - we extract content for analysis
+    const documentsWithScores: [{ pageContent: string }, number][] = topMatches.map(match => {
+      // Safely extract content from Pinecone metadata and ensure it's a string
+      const rawContent = match.metadata?.content || match.metadata?.text || '';
+      const content = typeof rawContent === 'string' ? rawContent : String(rawContent);
+      
+      console.log(`🔍 Document content for FULL BM25 with IDF (${content.length} chars): ${content.substring(0, 100)}...`);
+      
+      return [
+        { pageContent: content }, // This content will be analyzed by FULL BM25 algorithm (TF + IDF)
+        match.score || 0          // Original Pinecone vector similarity score (cosine)
+      ];
+    });
+    
+    // Rerank using hybrid approach: Pinecone semantic + Full BM25 (with IDF)
+    // HybridSearch.rerank() now uses FULL BM25 algorithm with IDF weighting
+    console.log(`📊 Calculating IDF across ${documentsWithScores.length} documents...`);
+    const rerankedResults = HybridSearch.rerank(
+      userQuestion, 
+      documentsWithScores, 
+      0.7 // 70% Pinecone vector + 30% Full BM25 (with IDF)
+    );
+    
+    console.log('📊 Hybrid reranking results (Vector + FULL BM25 with IDF):');
+    rerankedResults.slice(0, 5).forEach(([doc, hybridScore], index) => {
+      const originalMatch = topMatches.find(m => {
+        const matchContent = m.metadata?.content || m.metadata?.text || '';
+        const matchContentStr = typeof matchContent === 'string' ? matchContent : String(matchContent);
+        return matchContentStr === doc.pageContent;
+      });
+      const vectorScore = originalMatch?.score || 0;
+      
+      // Calculate both old (without IDF) and new (with IDF) BM25 scores for comparison
+      const allDocTexts = documentsWithScores.map(([d]) => d.pageContent);
+      const bm25ScoreWithIDF = HybridSearch.calculateBM25Score(userQuestion, doc.pageContent, allDocTexts);
+      const bm25ScoreNoIDF = HybridSearch.calculateKeywordScore(userQuestion, doc.pageContent);
+      
+      console.log(`   ${index + 1}. Vector: ${vectorScore.toFixed(4)} | BM25 (no IDF): ${bm25ScoreNoIDF.toFixed(2)} | BM25 (with IDF): ${bm25ScoreWithIDF.toFixed(2)} → Hybrid: ${hybridScore.toFixed(4)}`);
+      console.log(`      Content: ${doc.pageContent.substring(0, 80)}...`);
+    });
 
-    if (filteredMatches.length === 0 && topMatches.length > 0) {
-      console.log('⚠️ No relevant documents found above threshold, using top 5 results');
-      filteredMatches.push(...topMatches.slice(0, 5));
+    // Filter results by relevance threshold (now using hybrid scores)
+    const relevanceThreshold = 0.35;
+    const filteredMatches = rerankedResults
+      .map(([doc, hybridScore], index) => ({
+        ...topMatches[documentsWithScores.findIndex(([d]) => d.pageContent === doc.pageContent)],
+        score: hybridScore
+      }))
+      .filter(match => (match.score || 0) >= relevanceThreshold) || [];
+
+    if (filteredMatches.length === 0 && rerankedResults.length > 0) {
+      console.log('⚠️ No relevant documents found above threshold, using top 5 hybrid results');
+      filteredMatches.push(
+        ...rerankedResults.slice(0, 5).map(([doc, hybridScore], index) => ({
+          ...topMatches[documentsWithScores.findIndex(([d]) => d.pageContent === doc.pageContent)],
+          score: hybridScore
+        }))
+      );
     }
 
     // Convert Pinecone matches to LangChain Documents
@@ -391,6 +460,7 @@ ${doc.pageContent}
         headers: {
           'Content-Type': 'text/plain; charset=utf-8',
           'X-Vector-DB': 'Pinecone',
+          'X-Search-Method': 'Vector + BM25 Hybrid',
           'X-Documents-Found': relevantDocs.length.toString(),
           'X-Index-Name': PINECONE_CONFIG.indexName,
         },

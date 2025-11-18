@@ -225,11 +225,120 @@ export class QueryExpander {
 
 /**
  * Hybrid Search
- * Combines semantic similarity with keyword matching
+ * Combines semantic similarity with keyword matching using proper BM25 algorithm
  */
 export class HybridSearch {
   /**
-   * Calculate BM25-style keyword score
+   * Calculate IDF (Inverse Document Frequency) for a term across all documents
+   * IDF penalizes common terms and boosts rare/specific terms
+   * 
+   * Formula: IDF(term) = log((N - df + 0.5) / (df + 0.5) + 1)
+   * where N = total documents, df = documents containing the term
+   */
+  private static calculateIDF(
+    term: string,
+    documents: string[],
+    documentFrequency: Map<string, number>
+  ): number {
+    const N = documents.length;
+    const df = documentFrequency.get(term) || 0;
+    
+    // BM25 IDF formula with smoothing
+    // Adding 1 to avoid negative IDF for terms appearing in >50% of documents
+    const idf = Math.log((N - df + 0.5) / (df + 0.5) + 1);
+    
+    return Math.max(0, idf); // Ensure non-negative IDF
+  }
+
+  /**
+   * Calculate document frequency (df) for all terms across the corpus
+   * df = number of documents containing the term
+   */
+  private static buildDocumentFrequency(documents: string[]): Map<string, number> {
+    const documentFrequency = new Map<string, number>();
+    
+    for (const doc of documents) {
+      const docTerms = new Set(doc.toLowerCase().split(/\s+/));
+      
+      // Convert Set to Array for iteration compatibility
+      Array.from(docTerms).forEach(term => {
+        if (term.length > 2) { // Filter out very short terms
+          documentFrequency.set(term, (documentFrequency.get(term) || 0) + 1);
+        }
+      });
+    }
+    
+    return documentFrequency;
+  }
+
+  /**
+   * Calculate full BM25 score with IDF
+   * 
+   * BM25 Formula:
+   * score = Σ [IDF(qi) × (f(qi, D) × (k1 + 1)) / (f(qi, D) + k1 × (1 - b + b × |D| / avgdl))]
+   * 
+   * where:
+   * - qi = query term i
+   * - f(qi, D) = frequency of qi in document D
+   * - |D| = length of document D
+   * - avgdl = average document length in corpus
+   * - k1 = term frequency saturation parameter (typically 1.2-2.0)
+   * - b = length normalization parameter (typically 0.75)
+   */
+  static calculateBM25Score(
+    query: string,
+    document: string,
+    allDocuments: string[],
+    documentFrequency?: Map<string, number>
+  ): number {
+    const queryTerms = query.toLowerCase().split(/\s+/).filter(t => t.length > 2);
+    const docTerms = document.toLowerCase().split(/\s+/);
+    const docLength = docTerms.length;
+    
+    // BM25 parameters
+    const k1 = 1.5;  // Term frequency saturation (1.2-2.0 typical range)
+    const b = 0.75;  // Length normalization (0.75 standard)
+    
+    // Calculate average document length
+    const avgDocLength = allDocuments.reduce((sum, doc) => 
+      sum + doc.split(/\s+/).length, 0
+    ) / allDocuments.length;
+    
+    // Build document frequency if not provided
+    const df = documentFrequency || this.buildDocumentFrequency(allDocuments);
+    
+    // Calculate term frequency for this document
+    const termFrequency = new Map<string, number>();
+    for (const term of docTerms) {
+      termFrequency.set(term, (termFrequency.get(term) || 0) + 1);
+    }
+
+    let score = 0;
+    
+    // Calculate BM25 score for each query term
+    for (const queryTerm of queryTerms) {
+      const tf = termFrequency.get(queryTerm) || 0;
+      
+      if (tf > 0) {
+        // Calculate IDF for this term
+        const idf = this.calculateIDF(queryTerm, allDocuments, df);
+        
+        // Calculate length normalization
+        const lengthNorm = 1 - b + b * (docLength / avgDocLength);
+        
+        // Full BM25 formula: IDF × normalized TF
+        const normalizedTF = (tf * (k1 + 1)) / (tf + k1 * lengthNorm);
+        
+        score += idf * normalizedTF;
+      }
+    }
+
+    return score;
+  }
+
+  /**
+   * Calculate BM25 keyword score (simplified version for backward compatibility)
+   * @deprecated Use calculateBM25Score for proper IDF-weighted scoring
    */
   static calculateKeywordScore(query: string, document: string): number {
     const queryTerms = query.toLowerCase().split(/\s+/);
@@ -244,9 +353,9 @@ export class HybridSearch {
       termFrequency.set(term, (termFrequency.get(term) || 0) + 1);
     }
 
-    // BM25-inspired scoring (simplified)
-    const k1 = 1.5; // Term frequency saturation parameter
-    const avgDocLength = 500; // Average document length
+    // BM25-inspired scoring (without IDF)
+    const k1 = 1.5;
+    const avgDocLength = 500;
     
     for (const queryTerm of queryTerms) {
       const tf = termFrequency.get(queryTerm) || 0;
@@ -272,18 +381,36 @@ export class HybridSearch {
   }
 
   /**
-   * Re-rank documents using hybrid approach
+   * Re-rank documents using hybrid approach with FULL BM25 (including IDF)
    */
   static rerank<T extends { pageContent: string }>(
     query: string,
     documents: [T, number][],
     alpha: number = 0.7
   ): [T, number][] {
+    // Extract all document texts for IDF calculation
+    const allDocTexts = documents.map(([doc]) => doc.pageContent);
+    
+    // Pre-calculate document frequency for efficiency
+    const documentFrequency = this.buildDocumentFrequency(allDocTexts);
+    
+    // Calculate hybrid scores with full BM25 (including IDF)
     const rerankedDocs: [T, number][] = documents.map(([doc, semanticScore]) => {
-      const keywordScore = this.calculateKeywordScore(query, doc.pageContent);
-      // Normalize keyword score to 0-1 range
-      const normalizedKeywordScore = Math.min(keywordScore / 10, 1.0);
-      const hybridScore = this.combineScores(semanticScore, normalizedKeywordScore, alpha);
+      // Use FULL BM25 with IDF
+      const bm25Score = this.calculateBM25Score(
+        query, 
+        doc.pageContent, 
+        allDocTexts,
+        documentFrequency
+      );
+      
+      // Normalize BM25 score to 0-1 range
+      // BM25 scores typically range 0-20 for relevant documents
+      const normalizedBM25 = Math.min(bm25Score / 15, 1.0);
+      
+      // Combine semantic + BM25 scores
+      const hybridScore = this.combineScores(semanticScore, normalizedBM25, alpha);
+      
       return [doc, hybridScore];
     });
 

@@ -11,14 +11,14 @@ This document identifies critical missing features in the Enhanced route that sh
 
 ## 🔴 Critical Missing Features
 
-| Feature | Enhanced Route | Pinecone Route | Impact | Action Required |
-|---------|----------------|----------------|--------|-----------------|
-| **Vector Embeddings** | ❌ Keyword-only search | ✅ OpenAI embeddings (text-embedding-3-small) | HIGH - No true semantic search | Add embeddings for semantic similarity |
-| **Citation System** | ❌ No structured citations | ✅ Inline citations with format `【Source†Page X】` | HIGH - Cannot verify sources | Implement citation metadata tracking |
-| **Multi-Namespace Search** | ❌ Simple file-based datasets | ✅ Searches 5+ namespaces in parallel | MEDIUM - Limited data organization | Support namespace-like organization |
-| **Table Data Handling** | ❌ Text chunks only | ✅ Separate table namespaces | MEDIUM - Missing structured data | Add table-specific retrieval |
-| **Relevance Threshold** | ✅ Fixed 0.1 threshold | ✅ Adaptive 0.35 with fallback | LOW - May miss relevant results | Implement adaptive thresholds |
-| **Metadata Richness** | ⚠️ Basic metadata | ✅ Enhanced metadata (herb, botanical, dosha, category) | MEDIUM - Limited filtering | Enrich metadata structure |
+| Feature                    | Enhanced Route               | Pinecone Route                                         | Impact                             | Action Required                        |
+| -------------------------- | ---------------------------- | ------------------------------------------------------ | ---------------------------------- | -------------------------------------- |
+| **Vector Embeddings**      | ❌ Keyword-only search        | ✅ OpenAI embeddings (text-embedding-3-small)           | HIGH - No true semantic search     | Add embeddings for semantic similarity |
+| **Citation System**        | ❌ No structured citations    | ✅ Inline citations with format `【Source†Page X】`       | HIGH - Cannot verify sources       | Implement citation metadata tracking   |
+| **Multi-Namespace Search** | ❌ Simple file-based datasets | ✅ Searches 5+ namespaces in parallel                   | MEDIUM - Limited data organization | Support namespace-like organization    |
+| **Table Data Handling**    | ❌ Text chunks only           | ✅ Separate table namespaces                            | MEDIUM - Missing structured data   | Add table-specific retrieval           |
+| **Relevance Threshold**    | ✅ Fixed 0.1 threshold        | ✅ Adaptive 0.35 with fallback                          | LOW - May miss relevant results    | Implement adaptive thresholds          |
+| **Metadata Richness**      | ⚠️ Basic metadata            | ✅ Enhanced metadata (herb, botanical, dosha, category) | MEDIUM - Limited filtering         | Enrich metadata structure              |
 
 ---
 
