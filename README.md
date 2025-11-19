@@ -101,7 +101,18 @@ open http://localhost:3000/ayurveda # Ayurvedic RAG Chat
 - **`/api/chat`** - Basic OpenAI integration
 - **`/api/ex1-ex3`** - Progressive LangChain examples  
 - **`/api/ex4`** - US States JSON RAG example
-- **`/api/ayurveda`** - Advanced MinerU-powered Ayurvedic RAG ⭐
+- **`/api/ayurveda`** - Advanced MinerU-powered Ayurvedic RAG
+- **`/api/graphrag`** - Graph RAG with knowledge graph ⭐ NEW
+
+### 4. Access the Applications
+
+```bash
+# Traditional vector-based RAG
+open http://localhost:3000/ayurveda
+
+# Graph RAG with entity/relationship extraction
+open http://localhost:3000/graphrag
+```
 
 ## 📚 MinerU PDF Processing Pipeline
 

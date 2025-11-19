@@ -33,7 +33,9 @@ echo "OPENAI_API_KEY=your_key_here" >> .env.local
 npm run dev
 ```
 
-Navigate to: `http://localhost:3000/ayurveda`
+Navigate to different RAG implementations:
+- **Traditional Vector RAG**: `http://localhost:3000/ayurveda`
+- **Graph RAG**: `http://localhost:3000/graphrag` ⭐ NEW
 
 ### 2. Test Python LangChain Integration
 
@@ -48,6 +50,25 @@ export OPENAI_API_KEY="your_key_here"
 cd scripts
 python langchain_rag_example.py
 ```
+
+### 3. Explore Graph RAG
+
+Graph RAG provides entity and relationship-aware retrieval:
+
+```bash
+# Access Graph RAG interface
+open http://localhost:3000/graphrag
+
+# Get graph statistics
+curl http://localhost:3000/api/graphrag
+
+# Example query
+curl -X POST http://localhost:3000/api/graphrag \
+  -H "Content-Type: application/json" \
+  -d '{"messages": [{"role": "user", "content": "What herbs treat fever?"}]}'
+```
+
+See [GRAPH_RAG_GUIDE.md](GRAPH_RAG_GUIDE.md) for detailed documentation.
 
 ## 🔧 Integration Examples
 
