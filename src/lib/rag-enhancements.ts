@@ -11,6 +11,33 @@
 
 import { Document } from "@langchain/core/documents";
 
+// Common English stop words that should be excluded from BM25 scoring
+// These words don't add discriminative value for medical/Ayurvedic content
+const STOP_WORDS = new Set([
+  // Articles
+  'a', 'an', 'the',
+  // Pronouns
+  'i', 'you', 'he', 'she', 'it', 'we', 'they', 'me', 'him', 'her', 'us', 'them',
+  'my', 'your', 'his', 'its', 'our', 'their', 'mine', 'yours', 'hers', 'ours', 'theirs',
+  'myself', 'yourself', 'himself', 'herself', 'itself', 'ourselves', 'themselves',
+  // Common verbs
+  'is', 'am', 'are', 'was', 'were', 'be', 'been', 'being',
+  'have', 'has', 'had', 'having', 'do', 'does', 'did', 'doing',
+  'will', 'would', 'should', 'could', 'may', 'might', 'can',
+  // Prepositions
+  'in', 'on', 'at', 'to', 'for', 'with', 'by', 'from', 'of', 'about',
+  'as', 'into', 'through', 'during', 'before', 'after', 'above', 'below',
+  'between', 'under', 'over',
+  // Conjunctions
+  'and', 'or', 'but', 'so', 'because', 'if', 'when', 'where', 'while',
+  // Question words (often not in corpus but common in queries)
+  'what', 'why', 'how', 'who', 'which', 'whom', 'whose', 'where', 'when',
+  // Other common words
+  'this', 'that', 'these', 'those', 'there', 'here',
+  'then', 'than', 'not', 'no', 'yes', 'all', 'any', 'some', 'such',
+  'get', 'got', 'just', 'like', 'also', 'only', 'very', 'too', 'more', 'most',
+]);
+
 // Query intent types for routing
 export type QueryIntent = 
   | 'clinical_treatment'    // Seeking treatment for a condition
@@ -258,13 +285,14 @@ export class HybridSearch {
     const documentFrequency = new Map<string, number>();
     
     for (const doc of documents) {
-      const docTerms = new Set(doc.toLowerCase().split(/\s+/));
+      // Extract unique terms from document, excluding stop words
+      const docTerms = new Set(
+        doc.toLowerCase().split(/\s+/).filter(t => t.length > 2 && !STOP_WORDS.has(t))
+      );
       
       // Convert Set to Array for iteration compatibility
       Array.from(docTerms).forEach(term => {
-        if (term.length > 2) { // Filter out very short terms
-          documentFrequency.set(term, (documentFrequency.get(term) || 0) + 1);
-        }
+        documentFrequency.set(term, (documentFrequency.get(term) || 0) + 1);
       });
     }
     
@@ -291,7 +319,8 @@ export class HybridSearch {
     allDocuments: string[],
     documentFrequency?: Map<string, number>
   ): number {
-    const queryTerms = query.toLowerCase().split(/\s+/).filter(t => t.length > 2);
+    // Filter stop words from query to focus on meaningful keywords
+    const queryTerms = query.toLowerCase().split(/\s+/).filter(t => t.length > 2 && !STOP_WORDS.has(t));
     const docTerms = document.toLowerCase().split(/\s+/);
     const docLength = docTerms.length;
     
@@ -382,17 +411,43 @@ export class HybridSearch {
 
   /**
    * Re-rank documents using hybrid approach with FULL BM25 (including IDF)
+   * Returns: [reranked documents, IDF scores map for query terms]
    */
   static rerank<T extends { pageContent: string }>(
     query: string,
     documents: [T, number][],
     alpha: number = 0.7
-  ): [T, number][] {
+  ): { reranked: [T, number][], idfScores: Map<string, number>, debugInfo: any } {
     // Extract all document texts for IDF calculation
     const allDocTexts = documents.map(([doc]) => doc.pageContent);
     
     // Pre-calculate document frequency for efficiency
     const documentFrequency = this.buildDocumentFrequency(allDocTexts);
+    
+    // Calculate IDF scores for query terms with detailed debugging
+    // Filter out stop words and short terms to focus on meaningful keywords
+    const allQueryTerms = query.toLowerCase().split(/\s+/);
+    const queryTerms = allQueryTerms.filter(t => t.length > 2 && !STOP_WORDS.has(t));
+    const filteredStopWords = allQueryTerms.filter(t => STOP_WORDS.has(t));
+    
+    const idfScores = new Map<string, number>();
+    const idfDebug: any[] = [];
+    
+    for (const term of queryTerms) {
+      const N = allDocTexts.length;
+      const df = documentFrequency.get(term) || 0;
+      const idf = this.calculateIDF(term, allDocTexts, documentFrequency);
+      
+      idfScores.set(term, idf);
+      idfDebug.push({
+        term,
+        N_totalDocuments: N,
+        df_documentFrequency: df,
+        df_percentage: `${((df / N) * 100).toFixed(1)}%`,
+        idf_score: parseFloat(idf.toFixed(4)),
+        calculation: `log((${N} - ${df} + 0.5) / (${df} + 0.5) + 1)`
+      });
+    }
     
     // Calculate hybrid scores with full BM25 (including IDF)
     const rerankedDocs: [T, number][] = documents.map(([doc, semanticScore]) => {
@@ -415,7 +470,22 @@ export class HybridSearch {
     });
 
     // Sort by hybrid score
-    return rerankedDocs.sort((a, b) => b[1] - a[1]);
+    const sortedDocs = rerankedDocs.sort((a, b) => b[1] - a[1]);
+    
+    // Compile debug information
+    const debugInfo = {
+      totalDocuments: allDocTexts.length,
+      queryTermsAnalyzed: queryTerms.length,
+      stopWordsFiltered: filteredStopWords.length > 0 ? filteredStopWords : undefined,
+      idfCalculations: idfDebug,
+      documentFrequencyMap: Object.fromEntries(
+        Array.from(documentFrequency.entries())
+          .filter(([term]) => queryTerms.includes(term))
+          .sort((a, b) => b[1] - a[1])
+      )
+    };
+    
+    return { reranked: sortedDocs, idfScores, debugInfo };
   }
 }
 

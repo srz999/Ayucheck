@@ -13,7 +13,10 @@ export default function AyurvedicPineconeChat() {
   const [useHybridRAG, setUseHybridRAG] = useState<boolean>(true); // Default to Hybrid RAG
   
   const { messages, input, handleInputChange, handleSubmit, isLoading, setMessages } = useChat({
-    api: useHybridRAG ? '/api/pineconehybridrag' : '/api/embedpinecone',
+    api: '/api/embedpinecone',
+    body: {
+      useHybridSearch: useHybridRAG
+    },
     initialMessages: [{
       id: 'welcome',
       role: 'assistant',
@@ -52,7 +55,7 @@ I'm enhanced with **Pinecone vector database** for cloud-scale semantic understa
 
   const checkPineconeHealth = async () => {
     try {
-      const endpoint = useHybridRAG ? '/api/pineconehybridrag' : '/api/embedpinecone';
+      const endpoint = '/api/embedpinecone';
       const response = await fetch(endpoint, {
         method: 'GET',
         headers: { 'Accept': 'application/json' }
