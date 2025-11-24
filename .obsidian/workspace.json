@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "enhanced-rag-flowchart.md",
+                "file": "paper/source-materials/QUANTITATIVE_RESULTS.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "enhanced-rag-flowchart"
+              "title": "QUANTITATIVE_RESULTS"
             }
           }
         ]
@@ -171,14 +171,39 @@
   },
   "active": "d1b8f9cb1d930fc2",
   "lastOpenFiles": [
-    "notes/detailed_rag_expert_review.md",
-    "BM25_IDF_QUICK_REFERENCE.md",
-    "BM25_IDF_VISUAL_COMPARISON.md",
-    "BM25_IDF_IMPROVEMENT.md",
-    "notes/rag_further_improvements.md",
-    "BM25_HYBRID_SEQUENCE_TRACE.md",
-    "HYBRID_RAG_ANALYSIS.md",
-    "enhancedrag_diff.md",
-    "enhanced-rag-flowchart.md"
+    "final-latex/main.tex",
+    "final-latex",
+    "paper/source-materials/presentation_final.md",
+    "paper/source-materials/GRAPHICAL_RESULTS.md",
+    "paper/source-materials/D_MODEL_ARCHITECTURE.md",
+    "paper/source-materials/C_METHODOLOGY_OVERVIEW.md",
+    "paper/source-materials/B_DATASET_PREPROCESSING.md",
+    "paper/source-materials/A_DATASET_OVERVIEW.md",
+    "paper/drafts/VI_REFERENCES.md",
+    "paper/drafts/V_CONCLUSION.md",
+    "paper/drafts/IV_RESULTS.md",
+    "paper/drafts/III_METHODOLOGY.md",
+    "paper/drafts/II_LITERATURE_REVIEW.md",
+    "paper/drafts/I_INTRODUCTION.md",
+    "paper/drafts/ABSTRACT.md",
+    "paper/ieee_paper_guidelines.md",
+    "paper/00-project-understanding/PROJECT_SUMMARY.md",
+    "paper/QUICK_REFERENCE.md",
+    "paper/README.md",
+    "paper/source-materials/QUANTITATIVE_RESULTS.md",
+    "paper/source-materials",
+    "paper/final-sections",
+    "paper/drafts",
+    "paper/input/presentation_final.md",
+    "paper/ieee_format_and_guidelines.md",
+    "paper/input",
+    "paper/04-writing/VI_REFERENCES.md",
+    "paper/04-writing/IV_RESULTS.md",
+    "paper/04-writing/III_METHODOLOGY.md",
+    "paper/04-writing/II_LITERATURE_REVIEW.md",
+    "paper/04-writing/I_INTRODUCTION.md",
+    "paper/03-results/prompts",
+    "paper/03-results",
+    "docs/presentation_references"
   ]
 }
