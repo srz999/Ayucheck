@@ -1,0 +1,62 @@
+[
+  {
+    "query": "what is the remedy for eczema?",
+    "reference": "Ayurvedic treatment for eczema (kushta) typically includes external application of herbal oils, internal medications to balance doshas, dietary modifications avoiding spicy and sour foods, and lifestyle changes to reduce stress.",
+    "category": "skin_diseases",
+    "intent": "clinical_treatment"
+  },
+  {
+    "query": "how to cure eczema?",
+    "reference": "Ayurvedic treatment for eczema (kushta) typically includes external application of herbal oils, internal medications to balance doshas, dietary modifications avoiding spicy and sour foods, and lifestyle changes to reduce stress.",
+    "category": "skin_diseases",
+    "intent": "clinical_treatment"
+  },
+  {
+    "query": "what are the benefits of Ashwagandha?",
+    "reference": "Ashwagandha (Withania somnifera) is an adaptogenic herb that reduces stress and anxiety, improves sleep quality, enhances cognitive function and memory, boosts immunity, increases strength and stamina, balances hormones, and has anti-inflammatory properties.",
+    "category": "pharmacopoeia",
+    "intent": "herb_properties"
+  },
+  {
+    "query": "how to treat anxiety with Ayurveda?",
+    "reference": "Ayurvedic treatment for anxiety includes herbs like Brahmi and Ashwagandha to calm the mind, meditation and pranayama breathing exercises, warm oil massage (abhyanga), avoiding stimulants, following a regular sleep schedule, and consuming sattvic foods that promote mental clarity.",
+    "category": "mental_disorders",
+    "intent": "clinical_treatment"
+  },
+  {
+    "query": "what herbs help with Vata imbalance?",
+    "reference": "Herbs that balance Vata dosha include Ashwagandha (calming), Bala (strengthening), Shatavari (nourishing), warming spices like ginger and cinnamon, and sesame oil for massage. These herbs have warming, grounding, and nourishing properties.",
+    "category": "general",
+    "intent": "herb_properties"
+  },
+  {
+    "query": "symptoms of pitta aggravation",
+    "reference": "Symptoms of aggravated Pitta dosha include excessive body heat, inflammation, skin rashes, acid reflux, heartburn, anger and irritability, excessive sweating, loose stools, bloodshot eyes, and sensitivity to heat.",
+    "category": "diagnostic",
+    "intent": "diagnostic"
+  },
+  {
+    "query": "Ayurvedic treatments for digestion problems",
+    "reference": "Ayurvedic treatments for digestive issues include herbs like Triphala, ginger, and cumin to strengthen digestive fire (agni), eating meals at regular times, avoiding cold drinks during meals, practicing mindful eating, and consuming warm, cooked foods that are easy to digest.",
+    "category": "general",
+    "intent": "clinical_treatment"
+  },
+  {
+    "query": "what is Triphala used for?",
+    "reference": "Triphala is a classical Ayurvedic formulation of three fruits (Amalaki, Bibhitaki, Haritaki) used for gentle detoxification, improving digestion, relieving constipation, supporting eye health, boosting immunity, and promoting healthy metabolism. It balances all three doshas.",
+    "category": "pharmacopoeia",
+    "intent": "herb_properties"
+  },
+  {
+    "query": "how to improve memory naturally?",
+    "reference": "Ayurvedic approaches to enhance memory include taking Brahmi (Bacopa monnieri) herb, practicing meditation and yoga, getting adequate sleep, consuming brain-nourishing foods like almonds and ghee, reducing stress, and performing specific memory-enhancing practices like oil pulling and head massage.",
+    "category": "mental_disorders",
+    "intent": "clinical_treatment"
+  },
+  {
+    "query": "diet recommendations for psoriasis",
+    "reference": "Ayurvedic dietary guidelines for psoriasis include avoiding sour, salty, and fermented foods, eliminating dairy products, increasing intake of bitter vegetables like bitter gourd, consuming fresh fruits, drinking plenty of water, avoiding alcohol and smoking, and following a cooling, anti-inflammatory diet.",
+    "category": "skin_diseases",
+    "intent": "lifestyle"
+  }
+]

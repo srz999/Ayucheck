@@ -8,17 +8,14 @@ import { formatDocumentsAsString } from 'langchain/util/document';
 import { HttpResponseOutputParser } from 'langchain/output_parsers';
 import { Document } from 'langchain/document';
 import { type AyurvedaMetadata } from '../../../lib/vector-store';
+import { HybridSearch } from '../../../lib/rag-enhancements';
 import { Pinecone } from '@pinecone-database/pinecone';
 import fs from 'fs';
 import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
+import { QueryLogger } from '../../../lib/query-logger';
 
 export const dynamic = 'force-dynamic';
-
-// Log environment variables for debugging
-console.log('🔑 PINECONE_API_KEY loaded:', process.env.PINECONE_API_KEY ? `${process.env.PINECONE_API_KEY.substring(0, 10)}...` : 'NOT FOUND');
-console.log('📍 PINECONE_INDEX_NAME:', process.env.PINECONE_INDEX_NAME || 'ayurveda-knowledge (default)');
-console.log('🌍 PINECONE_ENVIRONMENT:', process.env.PINECONE_ENVIRONMENT || 'us-east-1-aws (default)');
 
 // Pinecone-specific configuration
 const PINECONE_CONFIG = {
@@ -93,8 +90,6 @@ async function initializePineconeIndex(): Promise<void> {
       .trim()
       .split('\n')
       .map(line => JSON.parse(line));
-    
-    console.log(`📚 Loaded ${rawData.length} Ayurvedic documents from RAG data`);
 
     // Convert to Document format with enhanced metadata
     const documents: Document<AyurvedaMetadata>[] = rawData.map((item: any, index: number) => {
@@ -303,7 +298,7 @@ export async function POST(req: NextRequest) {
     await initializePineconeIndex();
     console.log(`✅ [POST] Index initialization completed in ${Date.now() - initStartTime}ms`);
 
-    const { messages } = await req.json();
+    const { messages, useHybridSearch = true } = await req.json();
     const userQuestion = messages[messages.length - 1]?.content || '';
 
     if (!userQuestion) {
@@ -381,20 +376,89 @@ export async function POST(req: NextRequest) {
     // Take top 10 overall results
     const topMatches = allMatches.slice(0, 10);
 
-    console.log(`📊 Retrieved ${allMatches.length} total documents from ${namespaces.length} namespaces:`);
-    topMatches.forEach((match, index) => {
-      const ns = (match.metadata as any)?.namespace || 'unknown';
-      const content = (match.metadata?.content || match.metadata?.text) as string;
-      console.log(`   ${index + 1}. [${ns}] Score: ${match.score?.toFixed(4)} - ${content?.substring(0, 100)}...`);
-    });
+    // Log vector search results
+    logger.logVectorSearch(namespaces, allMatches.length, topMatches);
 
-    // Filter results by relevance threshold
-    const relevanceThreshold = 0.35; // Lowered from 0.7 to capture table data
-    const filteredMatches = topMatches.filter(match => (match.score || 0) >= relevanceThreshold) || [];
+    let filteredMatches: any[] = [];
 
-    if (filteredMatches.length === 0 && topMatches.length > 0) {
-      console.log('⚠️ No relevant documents found above threshold, using top 5 results');
-      filteredMatches.push(...topMatches.slice(0, 5));
+    if (useHybridSearch) {
+      logger.progress('Applying hybrid reranking...');
+      
+      // HYBRID RAG APPROACH EXPLANATION:
+  // 1. VECTOR SEARCH (Pinecone): Semantic similarity using cosine distance on embeddings
+  // 2. KEYWORD SEARCH (Local BM25 with IDF): Full BM25 algorithm with:
+  //    - TF (Term Frequency): How often terms appear in document
+  //    - IDF (Inverse Document Frequency): Boosts rare terms, penalizes common terms
+  //    - Length Normalization: Adjusts for document length differences
+  // 3. HYBRID FUSION: Weighted combination of both scores for final ranking
+  //
+  // Why FULL BM25 with IDF matters:
+  // - Common words like "the", "and", "for" get low IDF scores (ignored)
+  // - Rare/specific terms like "turmeric", "ashwagandha" get high IDF scores (boosted)
+  // - Better precision: focuses on meaningful keywords, not just any keyword match
+  
+  // Create documents with proper structure for LOCAL BM25 keyword matching
+  // Note: BM25 is calculated locally, NOT by Pinecone - we extract content for analysis
+      const documentsWithScores: [{ pageContent: string }, number][] = topMatches.map(match => {
+        // Safely extract content from Pinecone metadata and ensure it's a string
+        const rawContent = match.metadata?.content || match.metadata?.text || '';
+        const content = typeof rawContent === 'string' ? rawContent : String(rawContent);
+        
+        return [
+          { pageContent: content }, // This content will be analyzed by FULL BM25 algorithm (TF + IDF)
+          match.score || 0          // Original Pinecone vector similarity score (cosine)
+        ];
+      });
+  
+      // Rerank using hybrid approach: Pinecone semantic + Full BM25 (with IDF)
+      // HybridSearch.rerank() now uses FULL BM25 algorithm with IDF weighting
+      const { reranked: rerankedResults, idfScores, debugInfo } = HybridSearch.rerank(
+        userQuestion, 
+        documentsWithScores, 
+        0.7 // 70% Pinecone vector + 30% Full BM25 (with IDF)
+      );
+      
+      // Log BM25 analysis with IDF scoring and debug trace
+      // IDF (Inverse Document Frequency) automatically weights terms by rarity:
+      // - High IDF: Rare/specific terms (e.g., "cure", "eczema", "turmeric") → boosted significance
+      // - Low IDF: Common words (e.g., "how", "do", "i", "the", "and") → minimal impact
+      // This ensures BM25 focuses on medically relevant keywords rather than filler words
+      const allDocTexts = documentsWithScores.map(([d]) => d.pageContent);
+      logger.logBM25Analysis(userQuestion, allDocTexts, idfScores, debugInfo);
+      
+      // Log hybrid reranking results
+      logger.logHybridReranking(0.7, rerankedResults, topMatches);
+
+      // Filter results by relevance threshold (now using hybrid scores)
+      const relevanceThreshold = 0.35;
+      filteredMatches = rerankedResults
+        .map(([doc, hybridScore], index) => ({
+          ...topMatches[documentsWithScores.findIndex(([d]) => d.pageContent === doc.pageContent)],
+          score: hybridScore
+        }))
+        .filter(match => (match.score || 0) >= relevanceThreshold) || [];
+
+      if (filteredMatches.length === 0 && rerankedResults.length > 0) {
+        filteredMatches.push(
+          ...rerankedResults.slice(0, 5).map(([doc, hybridScore], index) => ({
+            ...topMatches[documentsWithScores.findIndex(([d]) => d.pageContent === doc.pageContent)],
+            score: hybridScore
+          }))
+        );
+      }
+      
+      logger.logFilteredDocuments(filteredMatches, relevanceThreshold, true);
+    } else {
+      // Use top matches from Pinecone directly
+      const vectorThreshold = 0.40;
+      
+      filteredMatches = topMatches.filter(match => (match.score || 0) >= vectorThreshold);
+      
+      if (filteredMatches.length === 0 && topMatches.length > 0) {
+        filteredMatches = topMatches.slice(0, 5);
+      }
+      
+      logger.logFilteredDocuments(filteredMatches, vectorThreshold, false);
     }
 
     // Convert Pinecone matches to LangChain Documents
@@ -470,8 +534,12 @@ ${doc.pageContent}
       modelName: 'gpt-4o-mini',
       temperature: 0.3,
       streaming: true,
-      verbose: true,
+      verbose: false,
+      callbacks: [],
     });
+    
+    logger.logLLMGeneration('gpt-4o-mini', 0.3, relevantDocs.length);
+    logger.progress('Generating response...');
 
     // Create the RAG chain using RunnableSequence
     const ragChain = RunnableSequence.from([
@@ -501,6 +569,7 @@ ${doc.pageContent}
         headers: {
           'Content-Type': 'text/plain; charset=utf-8',
           'X-Vector-DB': 'Pinecone',
+          'X-Search-Method': useHybridSearch ? 'Vector + BM25 Hybrid' : 'Vector Only',
           'X-Documents-Found': relevantDocs.length.toString(),
           'X-Index-Name': PINECONE_CONFIG.indexName,
           'X-Request-Time-Ms': (Date.now() - requestStartTime).toString(),

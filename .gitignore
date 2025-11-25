@@ -35,6 +35,10 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# Query debug logs
+logs/
+*.log
+
 # Python Virtual Environments
 venv/
 env/
