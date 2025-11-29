@@ -1,8 +1,9 @@
 pipeline {
-    agent any
-    
-    tools {
-        nodejs 'NodeJS'  // Make sure to configure NodeJS in Jenkins Global Tool Configuration
+    agent {
+        docker {
+            image 'node:18-alpine'
+            args '-v /var/run/docker.sock:/var/run/docker.sock'
+        }
     }
     
     environment {
@@ -10,6 +11,8 @@ pipeline {
         NEXT_TELEMETRY_DISABLED = '1'
         // Set Node environment
         NODE_ENV = 'production'
+        // Home directory for npm cache
+        HOME = "${WORKSPACE}"
     }
     
     stages {
@@ -23,21 +26,21 @@ pipeline {
         stage('Install Dependencies') {
             steps {
                 echo 'Installing npm dependencies...'
-                bat 'npm ci'  // Use 'sh npm ci' for Linux/Mac agents
+                sh 'npm ci --prefer-offline --no-audit'
             }
         }
         
         stage('Lint') {
             steps {
                 echo 'Running lint checks...'
-                bat 'npm run lint'  // Use 'sh npm run lint' for Linux/Mac agents
+                sh 'npm run lint'
             }
         }
         
         stage('Build') {
             steps {
                 echo 'Building Next.js application...'
-                bat 'npm run build'  // Use 'sh npm run build' for Linux/Mac agents
+                sh 'npm run build'
             }
         }
         
@@ -45,7 +48,7 @@ pipeline {
             steps {
                 echo 'Running tests...'
                 // Uncomment when you have tests configured
-                // bat 'npm test'  // Use 'sh npm test' for Linux/Mac agents
+                // sh 'npm test'
                 echo 'No tests configured yet'
             }
         }
