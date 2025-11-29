@@ -1,6 +1,10 @@
 pipeline {
     agent any
     
+    tools {
+        nodejs 'NodeJS'  // This name must match the NodeJS installation name in Jenkins Global Tool Configuration
+    }
+    
     environment {
         // Prevent Next.js telemetry during CI
         NEXT_TELEMETRY_DISABLED = '1'
