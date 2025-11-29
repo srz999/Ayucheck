@@ -1,18 +1,11 @@
 pipeline {
-    agent {
-        docker {
-            image 'node:18-alpine'
-            args '-v /var/run/docker.sock:/var/run/docker.sock'
-        }
-    }
+    agent any
     
     environment {
         // Prevent Next.js telemetry during CI
         NEXT_TELEMETRY_DISABLED = '1'
         // Set Node environment
         NODE_ENV = 'production'
-        // Home directory for npm cache
-        HOME = "${WORKSPACE}"
     }
     
     stages {
