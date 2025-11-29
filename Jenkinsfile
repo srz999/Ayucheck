@@ -9,6 +9,32 @@ pipeline {
     }
     
     stages {
+        stage('Verify Environment') {
+            steps {
+                echo 'Verifying Node.js and npm installation...'
+                script {
+                    sh '''
+                        echo "=== Node.js Information ==="
+                        which node || echo "Node.js not found in PATH"
+                        node --version || echo "Node.js version check failed"
+                        
+                        echo ""
+                        echo "=== npm Information ==="
+                        which npm || echo "npm not found in PATH"
+                        npm --version || echo "npm version check failed"
+                        
+                        echo ""
+                        echo "=== PATH ==="
+                        echo $PATH
+                        
+                        echo ""
+                        echo "=== Workspace ==="
+                        pwd
+                    '''
+                }
+            }
+        }
+        
         stage('Checkout') {
             steps {
                 echo 'Checking out code...'
