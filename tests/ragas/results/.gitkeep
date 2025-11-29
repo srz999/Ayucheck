@@ -1,0 +1,9 @@
+# Results Directory
+
+Evaluation results are stored here.
+
+Each evaluation run generates:
+- `ragas_eval_[mode]_[timestamp].csv` - Detailed per-query results
+- `ragas_summary_[mode]_[timestamp].json` - Aggregated metrics summary
+
+Files are automatically timestamped to track evaluation history.

@@ -13,7 +13,10 @@ export default function AyurvedicPineconeChat() {
   const [useHybridRAG, setUseHybridRAG] = useState<boolean>(true); // Default to Hybrid RAG
   
   const { messages, input, handleInputChange, handleSubmit, isLoading, setMessages } = useChat({
-    api: useHybridRAG ? '/api/pineconehybridrag' : '/api/embedpinecone',
+    api: '/api/embedpinecone',
+    body: {
+      useHybridSearch: useHybridRAG
+    },
     initialMessages: [{
       id: 'welcome',
       role: 'assistant',
@@ -52,7 +55,7 @@ I'm enhanced with **Pinecone vector database** for cloud-scale semantic understa
 
   const checkPineconeHealth = async () => {
     try {
-      const endpoint = useHybridRAG ? '/api/pineconehybridrag' : '/api/embedpinecone';
+      const endpoint = '/api/embedpinecone';
       const response = await fetch(endpoint, {
         method: 'GET',
         headers: { 'Accept': 'application/json' }
@@ -173,9 +176,9 @@ I'm enhanced with **Pinecone vector database** for cloud-scale semantic understa
 **What Ayurvedic wisdom would you like to explore today?**`;
 
   return (
-    <div className="flex flex-col h-screen bg-gradient-to-br from-green-50 to-emerald-50">
+    <div className="flex flex-col h-screen bg-gradient-to-br from-green-50 to-emerald-50" data-testid="chat-container">
       {/* Header with Pinecone status */}
-      <div className="bg-white border-b border-green-200 p-4 shadow-sm">
+      <div className="bg-white border-b border-green-200 p-4 shadow-sm" data-testid="chat-header">
         <div className="max-w-4xl mx-auto flex justify-between items-center">
           <div>
             <h1 className="text-2xl font-bold text-green-900 flex items-center gap-2">
@@ -237,7 +240,7 @@ I'm enhanced with **Pinecone vector database** for cloud-scale semantic understa
 
       {/* Chat Messages */}
       <div className="flex-1 overflow-hidden">
-        <div className="h-full overflow-y-auto p-4">
+        <div className="h-full overflow-y-auto p-4" data-testid="chat-messages">
           <div className="max-w-4xl mx-auto space-y-4">
             {messages.map((message) => (
               <div
@@ -245,6 +248,7 @@ I'm enhanced with **Pinecone vector database** for cloud-scale semantic understa
                 className={`flex ${
                   message.role === 'user' ? 'justify-end' : 'justify-start'
                 }`}
+                data-testid={`message-${message.role}`}
               >
                 <div
                   className={`max-w-3xl p-4 rounded-lg shadow-sm ${
@@ -278,7 +282,7 @@ I'm enhanced with **Pinecone vector database** for cloud-scale semantic understa
               </div>
             ))}
             {isLoading && (
-              <div className="flex justify-start">
+              <div className="flex justify-start" data-testid="loading-indicator">
                 <div className="max-w-3xl p-4 rounded-lg bg-white border border-green-200 shadow-sm">
                   <div className={`flex items-center space-x-2 ${useHybridRAG ? 'text-purple-600' : 'text-green-600'}`}>
                     <div className={`animate-spin rounded-full h-4 w-4 border-b-2 ${useHybridRAG ? 'border-purple-600' : 'border-green-600'}`}></div>
@@ -297,7 +301,7 @@ I'm enhanced with **Pinecone vector database** for cloud-scale semantic understa
       </div>
 
       {/* Input Form */}
-      <div className="border-t border-green-200 bg-white p-4 shadow-lg">
+      <div className="border-t border-green-200 bg-white p-4 shadow-lg" data-testid="chat-input-form">
         <form onSubmit={handleSubmit} className="max-w-4xl mx-auto">
           <div className="flex space-x-4">
             <Input
@@ -313,6 +317,7 @@ I'm enhanced with **Pinecone vector database** for cloud-scale semantic understa
               onKeyPress={handleKeyPress}
               disabled={isLoading || connectionStatus !== 'connected'}
               className={`flex-1 ${useHybridRAG ? 'border-purple-300 focus:border-purple-500 focus:ring-purple-500' : 'border-green-300 focus:border-green-500 focus:ring-green-500'}`}
+              data-testid="chat-input"
             />
             <Button
               type="submit"
@@ -322,6 +327,7 @@ I'm enhanced with **Pinecone vector database** for cloud-scale semantic understa
                   ? 'bg-purple-600 hover:bg-purple-700' 
                   : 'bg-green-600 hover:bg-green-700'
               }`}
+              data-testid="chat-submit-button"
             >
               {isLoading ? (
                 <div className="flex items-center space-x-2">

@@ -10,7 +10,7 @@ const fs = require('fs');
 const path = require('path');
 
 const LOGS_DIR = path.join(__dirname, '..', 'logs', 'hybrid-rag-queries');
-const API_URL = 'http://localhost:3000/api/pineconehybridrag';
+const API_URL = 'http://localhost:3000/api/embedpinecone';
 
 async function testQueryLogging() {
   console.log('🧪 Testing Query Debug Logging System\n');
